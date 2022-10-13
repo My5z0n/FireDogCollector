@@ -23,7 +23,7 @@ func searchUP(graph map[string]models.SpanTag, id string) []string {
 		return append([]string{v.Span_Name}, ret...)
 
 	} else {
-		return []string{""}
+		return []string{"!START"}
 	}
 
 }

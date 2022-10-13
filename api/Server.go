@@ -11,6 +11,7 @@ import (
 	commonpb "go.opentelemetry.io/proto/otlp/common/v1"
 	"go.opentelemetry.io/proto/otlp/trace/v1"
 	"golang.org/x/sync/errgroup"
+	"log"
 	"regexp"
 	"time"
 )
@@ -67,10 +68,18 @@ func (s *Server) saveDogDig(dataDigChan <-chan models.ClickHouseSpan) error {
 	spanDependencyMap := make(map[string]models.SpanTag)
 	spanChildCounter := make(map[string]int)
 	spanLeafList := []string{}
+	currentTraceID := ""
 
 	for len(dataDigChan) > 0 {
 		//Load next Span
 		v := <-dataDigChan
+
+		if currentTraceID == "" {
+			currentTraceID = v.Trace_id
+		} else if currentTraceID != v.Trace_id {
+			log.Printf("Foreign id detected: Expected %s got %s skiping...\n", currentTraceID, v.Trace_id)
+			continue
+		}
 
 		//Count child spans
 		spanChildCounter[v.Parent_span_id] = spanChildCounter[v.Parent_span_id] + 1
@@ -100,9 +109,10 @@ func (s *Server) saveDogDig(dataDigChan <-chan models.ClickHouseSpan) error {
 		}
 	}
 
-	_ = utils.GeneratePathsFromSpans(spanDependencyMap, spanLeafList)
+	paths := utils.GeneratePathsFromSpans(spanDependencyMap, spanLeafList)
+	err := s.TraceRepository.SaveDogDig(paths, currentTraceID, dogDigAttributes)
 
-	return nil
+	return err
 }
 
 func (s *Server) Export(ctx context.Context, request *coltracepb.ExportTraceServiceRequest) (*coltracepb.ExportTraceServiceResponse, error) {
@@ -131,7 +141,11 @@ func (s *Server) Export(ctx context.Context, request *coltracepb.ExportTraceServ
 		return &coltracepb.ExportTraceServiceResponse{}, err
 	}
 
-	s.saveDogDig(dataDigChan)
+	err := s.saveDogDig(dataDigChan)
+	if err != nil {
+		log.Printf("Error occured during saveDogDig %s", err)
+		return &coltracepb.ExportTraceServiceResponse{}, err
+	}
 
 	return &coltracepb.ExportTraceServiceResponse{}, nil
 }
