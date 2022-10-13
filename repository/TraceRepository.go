@@ -36,7 +36,7 @@ func (r *TraceRepository) openConn() error {
 	return nil
 }
 
-func (r *TraceRepository) SaveSpan(model models.SaveSpan) error {
+func (r *TraceRepository) SaveSpan(model models.ClickHouseSpan) error {
 	//comand := fmt.Sprintf("INSERT INTO trace ()")
 	//r.connection.AsyncInsert()
 	batch, err := r.connection.PrepareBatch(context.Background(), "INSERT INTO traces")
