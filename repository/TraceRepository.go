@@ -5,20 +5,24 @@ import (
 	"fmt"
 	"github.com/ClickHouse/clickhouse-go/v2"
 	"github.com/My5z0n/FireDogCollector/models"
-	"reflect"
-	"regexp"
 )
 
 type TraceRepository struct {
 	port       string
 	database   string
 	connection clickhouse.Conn
+	mapper     map[string]string
 }
 
 func NewTraceRepository(port string, database string) (TraceRepository, error) {
 	t := TraceRepository{
 		port:     port,
 		database: database,
+	}
+	t.mapper = map[string]string{
+		"firedog.test1": "firedog_test1",
+		"firedog.test2": "firedog_test2",
+		"firedog.test3": "firedog_test3",
 	}
 
 	return t, t.openConn()
@@ -58,66 +62,42 @@ func (r *TraceRepository) SaveDogDig(paths [][]string, traceId string, attribute
 
 	flatSpan := flattenSpansList(paths)[0]
 	//TODO: Handle many paths
+	fmt.Println(flatSpan)
 
-	columnNames := []string{"trace_id", "paths"}
-	//params := fmt.Sprintf("%s,%s", traceId, flatSpan)
-
-	list := []reflect.StructField{
-		{
-			Name: "C1",
-			Type: reflect.TypeOf(""),
-			Tag:  `ch:"trace_id"`,
-		},
-		{
-			Name: "C2",
-			Type: reflect.TypeOf(""),
-			Tag:  `ch:"paths"`,
-		},
-	}
-
-	var re = regexp.MustCompile(`\.`)
-	counter := 3
+	columnNames := []string{}
 
 	tmparr := []any{traceId, flatSpan}
+
 	for k, v := range attributes {
-		columnNames = append(columnNames, re.ReplaceAllString(k, "_"))
+		columnNames = append(columnNames, r.mapper[k])
 		tmparr = append(tmparr, v)
-		list = append(list, reflect.StructField{
-			Name: fmt.Sprintf("C%v", counter),
-			Type: reflect.TypeOf(""),
-			Tag:  reflect.StructTag(fmt.Sprintf(`ch:"%s"`, re.ReplaceAllString(k, "_"))),
-		})
-		counter += 1
+
 	}
 
-	obj := reflect.StructOf(list)
-	if obj.Kind() != reflect.Struct {
-		fmt.Println("Error")
-	} else {
-		fmt.Println("Good")
+	params := "trace_id, paths"
+	for _, v := range columnNames {
+		params = fmt.Sprintf("%s,%s", params, v)
 	}
-	//fmt.Println(reflect.ValueOf(obj).Kind())
 
-	//err := r.connection.Exec(context.Background(), "INSERT INTO dogdig (?) VALUES (?)", columnNames, tmparr)
-	batch, err := r.connection.PrepareBatch(context.Background(), "INSERT INTO dogdig")
-	err = batch.AppendStruct(obj)
+	err := r.connection.Exec(context.Background(), fmt.Sprintf("INSERT INTO dogdig (%s) VALUES (?)", params), tmparr)
+
 	if err != nil {
 		return err
 	}
 
-	return batch.Send()
+	return nil
 }
 
 func flattenSpansList(paths [][]string) []string {
 
 	flattenPaths := make([]string, 0)
 
-	for range paths {
-		str := ""
-		for _, k := range paths {
-			str = fmt.Sprintf("%s'%s", str, k)
+	for _, v := range paths {
+		str := v[len(v)-1]
+		for i := len(v) - 2; i >= 0; i-- {
+			str = fmt.Sprintf("%s#%s", str, v[i])
 		}
-		str = fmt.Sprintf("%s'!END|", str)
+		str = fmt.Sprintf("%s'!END", str)
 		flattenPaths = append(flattenPaths, str)
 	}
 
