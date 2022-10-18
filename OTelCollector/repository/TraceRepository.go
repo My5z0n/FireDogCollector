@@ -60,13 +60,14 @@ func (r *TraceRepository) SaveSpan(model models.ClickHouseSpan) error {
 
 func (r *TraceRepository) SaveDogDig(paths [][]string, traceId string, attributes map[string]any) error {
 
+	//tmpSpan := flattenSpansList(paths)
 	flatSpan := flattenSpansList(paths)[0]
 	//TODO: Handle many paths
 	fmt.Println(flatSpan)
 
 	columnNames := []string{}
 
-	tmparr := []any{traceId, flatSpan}
+	tmparr := []any{traceId, flatSpan, paths}
 
 	for k, v := range attributes {
 		columnNames = append(columnNames, r.mapper[k])
@@ -74,18 +75,22 @@ func (r *TraceRepository) SaveDogDig(paths [][]string, traceId string, attribute
 
 	}
 
-	params := "trace_id, paths"
+	params := "trace_id, paths, pathsArray"
 	for _, v := range columnNames {
 		params = fmt.Sprintf("%s,%s", params, v)
 	}
 
-	err := r.connection.Exec(context.Background(), fmt.Sprintf("INSERT INTO dogdig (%s) VALUES (?)", params), tmparr)
+	batch, err := r.connection.PrepareBatch(context.Background(), fmt.Sprintf("INSERT INTO dogdig (%s)", params))
+	if err != nil {
+		return err
+	}
+	err = batch.Append(tmparr...)
 
 	if err != nil {
 		return err
 	}
 
-	return nil
+	return batch.Send()
 }
 
 func flattenSpansList(paths [][]string) []string {
@@ -93,11 +98,10 @@ func flattenSpansList(paths [][]string) []string {
 	flattenPaths := make([]string, 0)
 
 	for _, v := range paths {
-		str := v[len(v)-1]
-		for i := len(v) - 2; i >= 0; i-- {
+		str := v[0]
+		for i := 1; i < len(v); i++ {
 			str = fmt.Sprintf("%s#%s", str, v[i])
 		}
-		str = fmt.Sprintf("%s'!END", str)
 		flattenPaths = append(flattenPaths, str)
 	}
 

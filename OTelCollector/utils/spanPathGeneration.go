@@ -9,10 +9,19 @@ func GeneratePathsFromSpans(graph map[string]models.SpanTag, spanChilds []string
 	list := [][]string{}
 
 	for _, v := range spanChilds {
-		list = append(list, searchUP(graph, v))
+		ret := searchUP(graph, v)
+		reverse(ret)
+		ret = append(ret, "!END")
+		list = append(list, ret)
 
 	}
 	return list
+}
+
+func reverse(s []string) {
+	for i, j := 0, len(s)-1; i < j; i, j = i+1, j-1 {
+		s[i], s[j] = s[j], s[i]
+	}
 }
 
 func searchUP(graph map[string]models.SpanTag, id string) []string {

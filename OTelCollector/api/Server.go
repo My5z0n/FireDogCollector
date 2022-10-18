@@ -112,6 +112,7 @@ func (s *Server) saveDogDig(dataDigChan <-chan models.ClickHouseSpan) error {
 	paths := utils.GeneratePathsFromSpans(spanDependencyMap, spanLeafList)
 	err := s.TraceRepository.SaveDogDig(paths, currentTraceID, dogDigAttributes)
 
+	notifyInsertion(currentTraceID)
 	return err
 }
 
