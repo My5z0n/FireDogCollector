@@ -1,9 +1,9 @@
-
-
-
-import queue
+from asyncio import QueueEmpty
+from multiprocessing import Queue
 import time
-from turtle import Turtle
+
+from repository.FireDogTracesRepository import Repository
+
 
 
 class MLComponent:
@@ -12,7 +12,7 @@ class MLComponent:
     startLearningQueue = None
     repository = None
     
-    def __init__(self,spanqueue,mlqueue,repository) -> None:
+    def __init__(self, spanqueue: Queue, mlqueue: Queue, repository : Repository) -> None:
         self.repository = repository
         self.newSpanNoticationQueue=spanqueue
         self.startLearningQueue=mlqueue
@@ -23,7 +23,8 @@ class MLComponent:
             ret = ""
             try:
                 ret = self.startLearningQueue.get_nowait()
-            except queue.Empty:
+                self.LearnModel()
+            except QueueEmpty:
                 pass
             try:
                 ret = self.newSpanNoticationQueue.get_nowait()
@@ -31,14 +32,16 @@ class MLComponent:
                     self.calculateSpan(ret)
                 else:
                     pass
-            except queue.Empty:
+            except QueueEmpty:
                 time.Sleep(0.5)
 
 
 
     def LearnModel(self):
-        pass
+        data = self.repository.getPatshArray()
+
+        data = [v[0] for v in data]
+
 
     def calculateSpan(self,id):
         pass
-

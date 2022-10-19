@@ -1,24 +1,28 @@
 import clickhouse_connect
-from pandas import DataFrame
 import numpy as np
 
 class Repository:
     client = None
-    def connect(self) -> DataFrame:
-        self.client = clickhouse_connect.get_client(host='localhost',
-                                        database = 'FireDogTraces',
+    host = ""
+    database = ""
+
+
+    def __init__(self,host='localhost',database='FireDogTraces'):
+        self.host = host
+        self.database = database
+        self.client = clickhouse_connect.get_client(host=self.host,
+                                        database = self.database,
                                         query_limit=0)
-        data = self.client.query_np('SELECT pathsArray FROM dogdig')["pathsArray"]
-
-        new_array  = np.array([v[0] for v in data])
-
-
-        print(new_array)
-        return new_array
-
-
-
+    
+    def getPatshArray(self):
+        if self.client is not None:
+             data = self.client.query_np('SELECT pathsArray FROM dogdig')["pathsArray"]
+             return data
+        else:
+            raise Exception("No DB connected")
+    
 
 if __name__ == "__main__":
     x= Repository()
     x.connect()
+    x.getPatshArray

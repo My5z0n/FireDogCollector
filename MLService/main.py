@@ -20,15 +20,15 @@ def main():
     spanNotificationQueue = Queue()
     startModelQueue = Queue()
 
-    x = rabbitmqReceiver.RabbitmqReceiver(spanNotificationQueue)
-    consumer_process = Process(target=x.Lisen)
+    tmp = rabbitmqReceiver.RabbitmqReceiver(spanNotificationQueue)
+    consumer_process = Process(target=tmp.Lisen)
     consumer_process.start()
 
     consumer_process = Process(target=APIService.Init,args=(startModelQueue,))
     consumer_process.start()
 
-    x = MLComponent(spanNotificationQueue,startModelQueue,TracesRepository())
-    consumer_process = Process(target=x.Process,args=())
+    tmp = MLComponent(spanNotificationQueue,startModelQueue,TracesRepository())
+    consumer_process = Process(target=tmp.Process,args=())
     consumer_process.start()
 
 
@@ -43,3 +43,8 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+[START,API,HTTP_GET]
+[API,HTTP_GGET,CLIENT]
+[HTTP_GET,CLIENT,END]
