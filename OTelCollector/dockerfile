@@ -1,0 +1,36 @@
+FROM golang:1.19.1-alpine as base
+
+WORKDIR /APP
+
+COPY go.mod ./
+COPY go.sum ./
+
+RUN go mod download
+
+
+
+COPY ./*.go .
+
+
+COPY ./api/ ./api
+
+COPY ./models/ ./models
+
+COPY ./repository/ ./repository
+
+COPY ./utils/ ./utils
+
+RUN go build -o ../build/rungo .
+
+
+## Step 2
+
+FROM golang:1.19.1-alpine
+
+WORKDIR /BUILD
+
+COPY --from=base ./build .
+
+CMD [ "./rungo" ]
+
+

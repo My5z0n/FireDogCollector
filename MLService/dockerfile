@@ -1,0 +1,18 @@
+FROM tensorflow/tensorflow as base
+
+WORKDIR /APP
+
+RUN pip install pika clickhouse_connect
+
+
+COPY ./*.py .
+
+
+COPY ./MLComponent ./MLComponent
+
+COPY ./MLFiredogModel ./MLFiredogModel
+
+COPY ./repository ./repository
+
+
+CMD [ "python", "./main.py" ]
