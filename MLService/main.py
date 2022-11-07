@@ -1,15 +1,11 @@
-from ast import While
-from time import sleep
-from random import random
 from multiprocessing import Process
 from multiprocessing import Queue
 
-from certifi import where
-from matplotlib.pyplot import prism
+
 from MLComponent.mlComponent import MLComponent
 
-import rabbitmqReceiver
-import APIService
+import MsgReceiver.rabbitmqReceiver as rabbitmqReceiver
+import API.APIService as APIService
 
 from repository.FireDogTracesRepository import Repository as TracesRepository
 
@@ -43,8 +39,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-[START,API,HTTP_GET]
-[API,HTTP_GGET,CLIENT]
-[HTTP_GET,CLIENT,END]

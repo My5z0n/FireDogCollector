@@ -10,20 +10,17 @@ from keras.models import Sequential
 from keras.layers import Dense
 from keras.layers import LSTM
 from keras.layers import Embedding
-
-from matplotlib import mlab
+import tensorflow as tf
 import numpy as np
 from numpy import array
-
+import os
 
 class MLModel:
     modelPath = ""
-    pathsArray = []
     tokenizer = None
     model = None
 
-    def __init__(self, pathsArray,modelPath='./MLFiredogModel/',):
-        self.pathsArray=pathsArray
+    def __init__(self,modelPath='./MLFiredogModel/',):
         self.modelPath=modelPath
     
 
@@ -42,16 +39,14 @@ class MLModel:
                 lines.append(span[i-length:i])
         return lines
 
-    def learn(self):
-        #oov_token="<OOV>"
-        tokenizer  = Tokenizer()
-        tokenizer.fit_on_texts(self.pathsArray)
+    def learn(self, pathsArray):
+        tokenizer  = Tokenizer(oov_token="<OOV>")
+        tokenizer.fit_on_texts(pathsArray)
         vocab_size = len(tokenizer.word_index) + 1
-        #print(t.word_index)
 
         
 
-        lines = self.splitPaths(self.pathsArray)
+        lines = self.splitPaths(pathsArray)
         
         sequences  = tokenizer.texts_to_sequences(lines)
         sequences = array(sequences)
@@ -76,14 +71,13 @@ class MLModel:
         model.fit(X, y, epochs=40)
 
         # save the model 
-
         self.model = model
         self.tokenizer = tokenizer
-        model.save(self.modelPath+'model.h5')
+        model.save(self.ls+'model.h5')
         dump(tokenizer, open(self.modelPath+'tokenizer.pkl', 'wb'))
         model.predi
 
-    def calculateSpan(self,paths):
+    def predict(self,paths):
         lines = self.splitPaths(paths)
         sequences  = self.tokenizer.texts_to_sequences(lines)
         sequences = array(sequences)
@@ -92,9 +86,17 @@ class MLModel:
             x = np.asarray([sequences[i][:-1]])
             print(x)
             ret = self.model.predict(x)
-            print(f"Ret: {ret}")
+            #print(ret)
+            
             yhat = np.argmax(ret,axis=1)
-            out_word = ''
+            #yhat= ret.argsort(axis=1)
+            
+            out= sequences[i][-1]
+            if ret[0][out] < 0.25:
+                print(f" {out} SMALLER")
+            else:
+                print(f" {out} Good")
+
             for word, index in self.tokenizer.word_index.items():
                 if index == yhat:
                     out_word = word
@@ -106,6 +108,7 @@ class MLModel:
 
 
 if __name__ == "__main__":
+   # tf.compat.v1.logging.set_verbosity(100)
     paths = [
         ['START','A','B','C','D','END'],
         ['START','A','B','C','F','G','END'],
@@ -117,6 +120,6 @@ if __name__ == "__main__":
         for i in range(100):
             new.append(p)
     #print(new)
-    x = MLModel(new)
+    x = MLModel()
     x.loadModel()
-    x.calculateSpan([paths[0]])
+    x.predict([paths[0]])
