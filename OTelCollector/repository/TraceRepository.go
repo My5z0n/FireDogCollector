@@ -58,7 +58,7 @@ func (r *TraceRepository) SaveSpan(model models.ClickHouseSpan) error {
 	return batch.Send()
 }
 
-func (r *TraceRepository) SaveDogDig(paths [][]string, traceId string, attributes map[string]any) error {
+func (r *TraceRepository) SaveDogDig(paths [][]map[string]string, traceId string, attributes map[string]any) error {
 
 	//tmpSpan := flattenSpansList(paths)
 	flatSpan := flattenSpansList(paths)[0]
@@ -93,14 +93,14 @@ func (r *TraceRepository) SaveDogDig(paths [][]string, traceId string, attribute
 	return batch.Send()
 }
 
-func flattenSpansList(paths [][]string) []string {
+func flattenSpansList(paths [][]map[string]string) []string {
 
 	flattenPaths := make([]string, 0)
 
 	for _, v := range paths {
-		str := v[0]
+		str := v[0]["span_name"]
 		for i := 1; i < len(v); i++ {
-			str = fmt.Sprintf("%s#%s", str, v[i])
+			str = fmt.Sprintf("%s#%s", str, v[i]["span_name"])
 		}
 		flattenPaths = append(flattenPaths, str)
 	}

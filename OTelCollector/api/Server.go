@@ -74,6 +74,7 @@ func (s *Server) saveDogDig(dataDigChan <-chan models.ClickHouseSpan) error {
 		//Load next Span
 		v := <-dataDigChan
 
+		//Check traceID
 		if currentTraceID == "" {
 			currentTraceID = v.Trace_id
 		} else if currentTraceID != v.Trace_id {
@@ -122,6 +123,7 @@ func (s *Server) Export(ctx context.Context, request *coltracepb.ExportTraceServ
 
 	g := new(errgroup.Group)
 
+	//Maximum 1000 of elements
 	dataDigChan := make(chan models.ClickHouseSpan, 1000)
 
 	for _, resSpan := range sp {
@@ -138,13 +140,13 @@ func (s *Server) Export(ctx context.Context, request *coltracepb.ExportTraceServ
 	}
 
 	if err := g.Wait(); err != nil {
-		fmt.Printf("Error occured during SpanExport %s", err)
+		log.Printf("Error occured during SpanExport %v \n", err)
 		return &coltracepb.ExportTraceServiceResponse{}, err
 	}
 
 	err := s.saveDogDig(dataDigChan)
 	if err != nil {
-		log.Printf("Error occured during saveDogDig %s", err)
+		log.Printf("Error occured during saveDogDig %v \n", err)
 		return &coltracepb.ExportTraceServiceResponse{}, err
 	}
 

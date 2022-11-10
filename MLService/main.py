@@ -1,40 +1,39 @@
 from multiprocessing import Process
 from multiprocessing import Queue
 
-
 from MLComponent.mlComponent import MLComponent
 
 import MsgReceiver.rabbitmqReceiver as rabbitmqReceiver
 import API.APIService as APIService
 
-from repository.FireDogTracesRepository import Repository as TracesRepository
+
+def workMLComponent(q1, q2):
+    MLComponent(q1, q2).Process()
+
+
+def work_API(q1):
+    APIService.Init(q1)
+
+
+def work_Rabbit(q1):
+    rabbitmqReceiver.RabbitmqReceiver(q1).Lisen()
 
 
 def main():
-  
+    span_notification_queue = Queue()
+    start_model_queue = Queue()
 
-    spanNotificationQueue = Queue()
-    startModelQueue = Queue()
-
-    tmp = rabbitmqReceiver.RabbitmqReceiver(spanNotificationQueue)
-    consumer_process = Process(target=tmp.Lisen)
+    consumer_process = Process(target=work_Rabbit, args=(span_notification_queue,))
     consumer_process.start()
 
-    consumer_process = Process(target=APIService.Init,args=(startModelQueue,))
+    consumer_process = Process(target=work_API, args=(start_model_queue,))
     consumer_process.start()
 
-    tmp = MLComponent(spanNotificationQueue,startModelQueue,TracesRepository())
-    consumer_process = Process(target=tmp.Process,args=())
+    consumer_process = Process(target=workMLComponent,
+                               args=(span_notification_queue, start_model_queue))
     consumer_process.start()
 
-
-    while True:
-        s = queue.get()
-        print("Got: ",s)
-
-
-
-
+    print("LOL")
 
 
 if __name__ == "__main__":

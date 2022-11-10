@@ -1,47 +1,53 @@
-from asyncio import QueueEmpty
 from multiprocessing import Queue
 import time
 
-from repository.FireDogTracesRepository import Repository
+import queue
 
+from MLComponent.mlModel import MLModel
+from repository.FireDogTracesRepository import Repository
 
 
 class MLComponent:
     modelReady = False
-    newSpanNoticationQueue = None
+    newSpanNotificationQueue = None
     startLearningQueue = None
     repository = None
-    
-    def __init__(self, spanqueue: Queue, mlqueue: Queue, repository : Repository) -> None:
-        self.repository = repository
-        self.newSpanNoticationQueue=spanqueue
-        self.startLearningQueue=mlqueue
+    model = None
+
+    def __init__(self, span_queue: Queue, ml_queue: Queue) -> None:
+        self.repository = Repository()
+        self.newSpanNotificationQueue = span_queue
+        self.startLearningQueue = ml_queue
+        self.model = MLModel()
 
     def Process(self):
-        
+
         while True:
             ret = ""
             try:
                 ret = self.startLearningQueue.get_nowait()
-                self.LearnModel()
-            except QueueEmpty:
+                print("Learning model!")
+                #self.LearnModel()
+            except queue.Empty:
                 pass
             try:
-                ret = self.newSpanNoticationQueue.get_nowait()
-                if self.modelReady is True:
-                    self.calculateSpan(ret)
-                else:
-                    pass
-            except QueueEmpty:
-                time.Sleep(0.5)
-
-
+                ret = self.newSpanNotificationQueue.get_nowait()
+                print("Calculate Path")
+                #if self.modelReady is True:
+                #    self.calculateSpan(ret)
+                #else:
+                #    pass
+            except queue.Empty:
+                time.sleep(0.5)
+                print("time end xdd")
 
     def LearnModel(self):
-        data = self.repository.getPatshArray()
+        data = self.repository.getPathsArray()
 
-        data = [v[0] for v in data]
+        data = [v[0]["span_name"] for v in data]
+        self.model.learn(data)
 
-
-    def calculateSpan(self,id):
-        pass
+    def calculateSpan(self, trace_id):
+        data = self.repository.getPathsArray(trace_id)[0][0]
+        result = self.model.predict(data)
+        self.repository.setPrediction(trace_id, *result)

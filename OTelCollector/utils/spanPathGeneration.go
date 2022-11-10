@@ -4,54 +4,44 @@ import (
 	"github.com/My5z0n/FireDogCollector/models"
 )
 
-func GeneratePathsFromSpans(graph map[string]models.SpanTag, spanChilds []string) [][]string {
+func GeneratePathsFromSpans(graph map[string]models.SpanTag, spanChilds []string) [][]map[string]string {
 
-	list := [][]string{}
+	list := [][]map[string]string{}
 
 	for _, v := range spanChilds {
 		ret := searchUP(graph, v)
 		reverse(ret)
-		ret = append(ret, "!END")
+		ret = append(ret, map[string]string{
+			"span_name": "!END",
+			"span_id":   "",
+		})
 		list = append(list, ret)
 
 	}
 	return list
 }
 
-func reverse(s []string) {
+func reverse(s []map[string]string) {
 	for i, j := 0, len(s)-1; i < j; i, j = i+1, j-1 {
 		s[i], s[j] = s[j], s[i]
 	}
 }
 
-func searchUP(graph map[string]models.SpanTag, id string) []string {
+func searchUP(graph map[string]models.SpanTag, id string) []map[string]string {
 
 	v, _ := graph[id]
 	if v.Span_Name != "" {
 		ret := searchUP(graph, v.Parent_Span_id)
-		return append([]string{v.Span_Name}, ret...)
+		return append([]map[string]string{{
+			"span_name": v.Span_Name,
+			"span_id":   id,
+		}}, ret...)
 
 	} else {
-		return []string{"!START"}
+		return []map[string]string{map[string]string{
+			"span_name": "!START",
+			"span_id":   "",
+		}}
 	}
 
 }
-
-/*	node, ok := graph[key]
-	if !ok {
-		return []string{name}
-	}
-	sortedSpans := []string{name}
-
-	sort.Slice(node, func(i, j int) bool {
-		return node[i].Start_time.After(node[j].Start_time)
-	})
-
-	for _, v := range node {
-		ret := DFS(graph, v.Span_id, v.Span_Name)
-		sortedSpans = append(sortedSpans, ret...)
-	}
-
-	return sortedSpans
-}
-*/

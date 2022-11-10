@@ -3,7 +3,7 @@ from keras.preprocessing.text import Tokenizer
 from tensorflow.keras.utils import to_categorical
 from tensorflow.keras.models import load_model
 from numpy import array
-from pickle import dump,load
+from pickle import dump, load
 from keras.preprocessing.text import Tokenizer
 from keras.utils import to_categorical
 from keras.models import Sequential
@@ -15,46 +15,43 @@ import numpy as np
 from numpy import array
 import os
 
+
 class MLModel:
     modelPath = ""
     tokenizer = None
     model = None
 
-    def __init__(self,modelPath='./MLFiredogModel/',):
-        self.modelPath=modelPath
-    
+    def __init__(self, modelPath='./MLFiredogModel/', ):
+        self.modelPath = modelPath
 
     def loadModel(self):
-        model = load_model(self.modelPath+'model.h5')
-        tokenizer = load(open(self.modelPath+'tokenizer.pkl', 'rb'))
+        model = load_model(self.modelPath + 'model.h5')
+        tokenizer = load(open(self.modelPath + 'tokenizer.pkl', 'rb'))
 
         self.model = model
         self.tokenizer = tokenizer
 
     def splitPaths(self, paths):
         lines = []
-        length = 2 + 1 #2 Previous calculate next
+        length = 2 + 1  # 2 Previous calculate next
         for span in paths:
-            for i in range(length,len(span)+1):
-                lines.append(span[i-length:i])
+            for i in range(length, len(span) + 1):
+                lines.append(span[i - length:i])
         return lines
 
     def learn(self, pathsArray):
-        tokenizer  = Tokenizer(oov_token="<OOV>")
+        tokenizer = Tokenizer(oov_token="<OOV>")
         tokenizer.fit_on_texts(pathsArray)
         vocab_size = len(tokenizer.word_index) + 1
 
-        
-
         lines = self.splitPaths(pathsArray)
-        
-        sequences  = tokenizer.texts_to_sequences(lines)
+
+        sequences = tokenizer.texts_to_sequences(lines)
         sequences = array(sequences)
 
-        X, y = sequences[:,:-1], sequences[:,-1]
+        X, y = sequences[:, :-1], sequences[:, -1]
         y = to_categorical(y, num_classes=vocab_size)
         seq_length = X.shape[1]
-
 
         model = Sequential()
         model.add(Embedding(vocab_size, 15, input_length=seq_length))
@@ -73,53 +70,50 @@ class MLModel:
         # save the model 
         self.model = model
         self.tokenizer = tokenizer
-        model.save(self.ls+'model.h5')
-        dump(tokenizer, open(self.modelPath+'tokenizer.pkl', 'wb'))
+        model.save(self.ls + 'model.h5')
+        dump(tokenizer, open(self.modelPath + 'tokenizer.pkl', 'wb'))
         model.predi
 
-    def predict(self,paths):
+    def predict(self, paths_array):
+        paths = [tmp["span_name"] for tmp in paths_array]
         lines = self.splitPaths(paths)
-        sequences  = self.tokenizer.texts_to_sequences(lines)
+        sequences = self.tokenizer.texts_to_sequences(lines)
         sequences = array(sequences)
 
+        no_path = 2
         for i in range(len(sequences)):
+            no_path += 1
             x = np.asarray([sequences[i][:-1]])
             print(x)
             ret = self.model.predict(x)
-            #print(ret)
-            
-            yhat = np.argmax(ret,axis=1)
+
+            yhat = np.argmax(ret, axis=1)
             #yhat= ret.argsort(axis=1)
-            
-            out= sequences[i][-1]
+
+            out = sequences[i][-1]
             if ret[0][out] < 0.25:
-                print(f" {out} SMALLER")
-            else:
-                print(f" {out} Good")
-
-            for word, index in self.tokenizer.word_index.items():
-                if index == yhat:
-                    out_word = word
-                    break
-            print(f'{lines[i]} Predicted -> {out_word}')
-
-
-
+                out_word = "ERR"
+                for word, index in self.tokenizer.word_index.items():
+                    if index == yhat:
+                        out_word = word
+                        break
+                return True, paths_array[no_path]["span_name"], paths_array[no_path]["span_id"], out_word
+                #print(f'{lines[i]} Predicted -> {out_word}')
 
 
 if __name__ == "__main__":
-   # tf.compat.v1.logging.set_verbosity(100)
+    # tf.compat.v1.logging.set_verbosity(100)
     paths = [
-        ['START','A','B','C','D','END'],
-        ['START','A','B','C','F','G','END'],
-        ['START','A','B','H','I','END'],
+        ['START', 'A', 'B', 'C', 'D', 'END'],
+        ['START', 'A', 'B', 'C', 'F', 'G', 'END'],
+        ['START', 'A', 'B', 'H', 'I', 'END'],
     ]
 
     new = []
     for p in paths:
         for i in range(100):
             new.append(p)
-    #print(new)
+    # print(new)
     x = MLModel()
     x.loadModel()
     x.predict([paths[0]])

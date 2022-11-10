@@ -1,30 +1,26 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 hostName = "localhost"
-serverPort = 8090
+serverPort = 9080
 
 
 class MyServer(BaseHTTPRequestHandler):
-    procesQueue = None
-
+    process_queue = None
 
     def do_GET(self):
 
-        if self.path == '/a':
-            print("A")
-        elif self.path == '/b':
-            print("B")
+        if self.path == '/START_TRAIN':
+            self.process_queue.put("START_TRAIN")
+
         self.send_response(200)
         self.send_header("Content-type", "text/html")
         self.end_headers()
-        self.procesQueue.put("START_TRAIN")
 
 
 
-def Init(q): 
+def Init(q):
     x = MyServer
-    x.procesQueue = q
-    webServer = HTTPServer((hostName, serverPort), MyServer)
-    
-    webServer.serve_forever()
+    x.process_queue = q
+    web_server = HTTPServer((hostName, serverPort), MyServer)
 
+    web_server.serve_forever()
