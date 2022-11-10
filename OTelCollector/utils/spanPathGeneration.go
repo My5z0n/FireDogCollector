@@ -38,7 +38,7 @@ func searchUP(graph map[string]models.SpanTag, id string) []map[string]string {
 		}}, ret...)
 
 	} else {
-		return []map[string]string{map[string]string{
+		return []map[string]string{{
 			"span_name": "!START",
 			"span_id":   "",
 		}}

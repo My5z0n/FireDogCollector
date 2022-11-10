@@ -54,10 +54,10 @@ class MLModel:
         seq_length = X.shape[1]
 
         model = Sequential()
-        model.add(Embedding(vocab_size, 15, input_length=seq_length))
-        model.add(LSTM(15, return_sequences=True))
-        model.add(LSTM(15))
-        model.add(Dense(15, activation='relu'))
+        model.add(Embedding(vocab_size, 32, input_length=seq_length))
+        model.add(LSTM(32, return_sequences=True))
+        model.add(LSTM(32))
+        model.add(Dense(16, activation='relu'))
         model.add(Dense(vocab_size, activation='softmax'))
         print(model.summary())
 
@@ -65,7 +65,7 @@ class MLModel:
         model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 
         # fit model
-        model.fit(X, y, epochs=40)
+        model.fit(X, y, epochs=32)
 
         # save the model 
         self.model = model
