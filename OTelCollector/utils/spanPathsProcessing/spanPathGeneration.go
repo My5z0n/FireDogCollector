@@ -1,4 +1,4 @@
-package utils
+package spanPathsProcessing
 
 import (
 	"github.com/My5z0n/FireDogCollector/models"

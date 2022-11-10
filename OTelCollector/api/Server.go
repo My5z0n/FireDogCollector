@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/My5z0n/FireDogCollector/models"
 	"github.com/My5z0n/FireDogCollector/repository"
-	"github.com/My5z0n/FireDogCollector/utils"
+	"github.com/My5z0n/FireDogCollector/utils/spanPathsProcessing"
 	coltracepb "go.opentelemetry.io/proto/otlp/collector/trace/v1"
 	commonpb "go.opentelemetry.io/proto/otlp/common/v1"
 	"go.opentelemetry.io/proto/otlp/trace/v1"
@@ -110,7 +110,7 @@ func (s *Server) saveDogDig(dataDigChan <-chan models.ClickHouseSpan) error {
 		}
 	}
 
-	paths := utils.GeneratePathsFromSpans(spanDependencyMap, spanLeafList)
+	paths := spanPathsProcessing.GeneratePathsFromSpans(spanDependencyMap, spanLeafList)
 	err := s.TraceRepository.SaveDogDig(paths, currentTraceID, dogDigAttributes)
 	return err
 }
