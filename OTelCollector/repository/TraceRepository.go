@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/ClickHouse/clickhouse-go/v2"
-	"github.com/My5z0n/FireDogCollector/models"
+	"github.com/My5z0n/FireDogCollector/OtelCollector/models"
 )
 
 type TraceRepository struct {

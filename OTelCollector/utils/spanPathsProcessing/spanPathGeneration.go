@@ -1,7 +1,7 @@
 package spanPathsProcessing
 
 import (
-	"github.com/My5z0n/FireDogCollector/models"
+	"github.com/My5z0n/FireDogCollector/OtelCollector/models"
 )
 
 func GeneratePathsFromSpans(graph map[string]models.SpanTag, spanChilds []string) [][]map[string]string {

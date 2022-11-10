@@ -1,13 +1,13 @@
 package main
 
 import (
-	"github.com/My5z0n/FireDogCollector/repository"
+	"github.com/My5z0n/FireDogCollector/OtelCollector/repository"
 	"log"
 	"net"
 
 	"google.golang.org/grpc"
 	//pb "google.golang.org/grpc/examples/helloworld/helloworld"
-	"github.com/My5z0n/FireDogCollector/api"
+	"github.com/My5z0n/FireDogCollector/OtelCollector/api"
 	coltracepb "go.opentelemetry.io/proto/otlp/collector/trace/v1"
 	//commonpb "go.opentelemetry.io/proto/otlp/common/v1"
 	//resourcepb "go.opentelemetry.io/proto/otlp/resource/v1"

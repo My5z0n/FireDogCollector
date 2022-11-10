@@ -1,4 +1,4 @@
-module github.com/My5z0n/FireDogCollector
+module github.com/My5z0n/FireDogCollector/OtelCollector
 
 go 1.19
 
