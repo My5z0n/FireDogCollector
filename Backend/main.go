@@ -6,9 +6,12 @@ import (
 	"github.com/My5z0n/FireDogCollector/Backend/cmd/api/server"
 	"github.com/My5z0n/FireDogCollector/Backend/cmd/api/services"
 	"github.com/My5z0n/FireDogCollector/Backend/cmd/data"
+	docs "github.com/My5z0n/FireDogCollector/Backend/docs"
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	swaggerfiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"os"
 	"time"
 )
@@ -18,6 +21,8 @@ func main() {
 
 	log.Info().Msg("Backend - FiredogTraces (c) 2022 - Szymon Nagel \n")
 	ginEngine := gin.Default()
+	docs.SwaggerInfo.BasePath = "/api/v1"
+	ginEngine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 	//gin.SetMode(gin.ReleaseMode)
 
 	dbConnection := server.CreateDBConnection()

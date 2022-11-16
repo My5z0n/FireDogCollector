@@ -14,6 +14,16 @@ type TraceControllerBinding struct {
 	Page int `form:"page"`
 }
 
+// Get godoc
+// @Summary ping example
+// @Schemes
+// @Description do ping
+// @Tags example
+// @Accept json
+// @Produce json
+// @Param page query int false "page"
+// @Router /traces [get]
+// @host localhost:9900
 func (c TraceController) Get(ctx *gin.Context) {
 	binding := TraceControllerBinding{}
 
