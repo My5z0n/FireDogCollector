@@ -3,11 +3,12 @@ package data
 import "github.com/ClickHouse/clickhouse-go/v2/lib/driver"
 
 type Models struct {
-	Spans       SpanModel
-	Traces      TraceModel
-	Predictions PredictModel
+	SpanModel  SpanModel
+	TraceModel TraceModel
+	//Predictions PredictModel
 }
 
-func getModels(db *driver.Conn) Models {
-	return Models{}
+func NewModels(db driver.Conn) Models {
+	return Models{SpanModel: SpanModel{DB: db},
+		TraceModel: TraceModel{DB: db}}
 }

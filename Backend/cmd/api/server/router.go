@@ -1,22 +1,21 @@
 package server
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/gin-gonic/gin"
+	"net/http"
+)
 
-type BackendRouter struct {
-	router *gin.RouterGroup
+func (s Sever) AttachHealthCheck() {
+
+	s.RouterGroup.GET("/health", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"status": "OK",
+		})
+	})
 }
+func (s Sever) AttachControllers() {
 
-func (r *BackendRouter) Attach() {
+	tracesRoute := s.RouterGroup.Group("/traces")
+	tracesRoute.GET("/", s.Controllers.TraceControllers.Get)
 
-	tracesRoute := r.router.Group("/traces")
-	tracesRoute.GET("/")
-
-}
-
-func NewBackendRouter(e *gin.Engine) *BackendRouter {
-	mainRouter := BackendRouter{
-		router: e.Group("/api/v1"),
-	}
-	mainRouter.Attach()
-	return &BackendRouter{}
 }

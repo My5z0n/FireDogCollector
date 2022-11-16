@@ -10,7 +10,7 @@ type dbConnectionSettings struct {
 	Name string
 }
 
-func CreateDBConnection() *driver.Conn {
+func CreateDBConnection() driver.Conn {
 	conn, err := clickhouse.Open(&clickhouse.Options{
 		Addr: []string{"localhost:9001"},
 		Auth: clickhouse.Auth{
@@ -21,5 +21,5 @@ func CreateDBConnection() *driver.Conn {
 	if err != nil {
 		log.Panicf("Error during CreateDBConnection: %v", err)
 	}
-	return &conn
+	return conn
 }
