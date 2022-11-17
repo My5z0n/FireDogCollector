@@ -9,7 +9,7 @@ type TraceService struct {
 	Models data.Repositories
 }
 
-func (s TraceService) GetTraces(page int) []dto.Trace {
+func (s TraceService) GetTracesWithAnomalies(page int) []dto.Trace {
 	PageSize := 2
 
 	result := s.Models.TraceRepository.GetTracesWithAnomalies(page*PageSize, PageSize)

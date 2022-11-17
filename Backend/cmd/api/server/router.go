@@ -16,6 +16,7 @@ func (s Sever) AttachHealthCheck() {
 func (s Sever) AttachControllers() {
 
 	tracesRoute := s.RouterGroup.Group("/traces")
-	tracesRoute.GET("/", s.Controllers.TraceControllers.Get)
+	tracesRoute.GET("/", s.Controllers.TraceControllers.GetAll)
+	tracesRoute.GET("/:traceid/", s.Controllers.TraceControllers.GetOne)
 
 }
