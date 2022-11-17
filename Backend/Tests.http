@@ -1,1 +1,1 @@
-GET http://localhost:9900/api/v1/traces/?page=1
+GET http://localhost:9900/api/v1/traces/?page=XD

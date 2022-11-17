@@ -3,6 +3,7 @@ package controllers
 import (
 	"github.com/My5z0n/FireDogCollector/Backend/cmd/api/services"
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog/log"
 	"net/http"
 )
 
@@ -11,7 +12,7 @@ type TraceController struct {
 }
 
 type TraceControllerBinding struct {
-	Page int `form:"page"`
+	Page int `form:"page" binding:"numeric,gte=0"`
 }
 
 // Get godoc
@@ -27,7 +28,12 @@ type TraceControllerBinding struct {
 func (c TraceController) Get(ctx *gin.Context) {
 	binding := TraceControllerBinding{}
 
-	ctx.ShouldBindQuery(&binding)
+	err := ctx.ShouldBindQuery(&binding)
+	if err != nil {
+		//TODO: PROPERLY HANDLE ERRORS
+		log.Error().Msg("BAD INPUT")
+		return
+	}
 
 	res := c.Services.TraceService.GetTraces(binding.Page)
 
