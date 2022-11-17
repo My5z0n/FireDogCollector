@@ -10,7 +10,7 @@ import (
 type Sever struct {
 	Engine      *gin.Engine
 	RouterGroup *gin.RouterGroup
-	Models      data.Models
+	Models      data.Repositories
 	Services    services.Services
 	Controllers controllers.Controllers
 }
@@ -19,7 +19,7 @@ func (s Sever) AttachRoutes() {
 	s.AttachControllers()
 	s.AttachHealthCheck()
 }
-func CreateNew(engine *gin.Engine, m data.Models, srcs services.Services, c controllers.Controllers) (server *Sever) {
+func CreateNew(engine *gin.Engine, m data.Repositories, srcs services.Services, c controllers.Controllers) (server *Sever) {
 	server = &Sever{
 		Engine:      engine,
 		RouterGroup: engine.Group("/api/v1"),

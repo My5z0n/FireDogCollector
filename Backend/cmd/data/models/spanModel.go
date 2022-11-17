@@ -1,9 +1,6 @@
-package data
+package models
 
-import (
-	"github.com/ClickHouse/clickhouse-go/v2/lib/driver"
-	"time"
-)
+import "time"
 
 type Span struct {
 	TraceID      string    `json:"trace_id"`
@@ -13,12 +10,4 @@ type Span struct {
 	StartTime    time.Time `json:"start_time"`
 	EndTime      time.Time `json:"end_time"`
 	Attributes   string    `json:"attributes"`
-}
-
-type SpanModel struct {
-	DB driver.Conn
-}
-
-func (m SpanModel) Get(spanID string) {
-
 }

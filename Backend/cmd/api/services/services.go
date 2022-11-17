@@ -7,7 +7,7 @@ type Services struct {
 	TraceService TraceService
 }
 
-func NewServices(models data.Models) Services {
+func NewServices(models data.Repositories) Services {
 	return Services{SpanService: SpanService{
 		Models: models},
 		TraceService: TraceService{
