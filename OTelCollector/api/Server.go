@@ -12,7 +12,7 @@ import (
 	"go.opentelemetry.io/proto/otlp/trace/v1"
 	"golang.org/x/sync/errgroup"
 	"log"
-	"regexp"
+	"sync/atomic"
 	"time"
 )
 
@@ -22,7 +22,7 @@ type Server struct {
 	TraceRepository repository.TraceRepository
 }
 
-func (s *Server) processSpan(resource *v1.ResourceSpans, scope *v1.ScopeSpans, span *v1.Span, dataDigChan chan<- models.ClickHouseSpan) error {
+func (s *Server) processSpan(resource *v1.ResourceSpans, scope *v1.ScopeSpans, span *v1.Span, processedSpanResultChan chan<- models.ClickHouseSpan) error {
 
 	attributesMap := make(map[string]any)
 	for i, v := range span.Attributes {
@@ -54,29 +54,29 @@ func (s *Server) processSpan(resource *v1.ResourceSpans, scope *v1.ScopeSpans, s
 		End_time:       time.Unix(0, int64(span.EndTimeUnixNano)),
 		Attributes:     attributesMap,
 	}
-	dataDigChan <- model
+	processedSpanResultChan <- model
 	err := s.TraceRepository.SaveSpan(model)
 
 	return err
 }
 
-func (s *Server) saveDogDig(dataDigChan <-chan models.ClickHouseSpan) error {
+func (s *Server) saveTrace(dataDigChan <-chan models.ClickHouseSpan, counter int32) error {
 
-	r, _ := regexp.Compile("^firedog.")
-
-	dogDigAttributes := make(map[string]any)
 	spanDependencyMap := make(map[string]models.SpanTag)
 	spanChildCounter := make(map[string]int)
 	spanLeafList := []string{}
 	currentTraceID := ""
+	var startTime time.Time
 
-	for len(dataDigChan) > 0 {
+	for counter > 0 {
 		//Load next Span
 		v := <-dataDigChan
+		counter -= 1
 
 		//Check traceID
 		if currentTraceID == "" {
 			currentTraceID = v.Trace_id
+			startTime = v.Start_time
 		} else if currentTraceID != v.Trace_id {
 			log.Printf("Foreign id detected: Expected %s got %s skiping...\n", currentTraceID, v.Trace_id)
 			continue
@@ -95,12 +95,6 @@ func (s *Server) saveDogDig(dataDigChan <-chan models.ClickHouseSpan) error {
 			Parent_Span_id: v.Parent_span_id,
 		}
 
-		//Find interesting attributes
-		for k, val := range v.Attributes {
-			if r.MatchString(k) {
-				dogDigAttributes[k] = val
-			}
-		}
 	}
 
 	//Get span leafs
@@ -111,7 +105,7 @@ func (s *Server) saveDogDig(dataDigChan <-chan models.ClickHouseSpan) error {
 	}
 
 	paths := spanPathsProcessing.GeneratePathsFromSpans(spanDependencyMap, spanLeafList)
-	err := s.TraceRepository.SaveDogDig(paths, currentTraceID, dogDigAttributes)
+	err := s.TraceRepository.SaveTrace(paths, currentTraceID, startTime)
 	return err
 }
 
@@ -122,29 +116,38 @@ func (s *Server) Export(ctx context.Context, request *coltracepb.ExportTraceServ
 	g := new(errgroup.Group)
 
 	//Maximum 1000 of elements
-	dataDigChan := make(chan models.ClickHouseSpan, 1000)
+	processSpanChan := make(chan models.ClickHouseSpan, 1000)
+
+	var waitCount int32
 
 	for _, resSpan := range sp {
 		for _, scopeSpan := range resSpan.GetScopeSpans() {
 			for _, span := range scopeSpan.GetSpans() {
 				name := span.Name
 				fmt.Printf("Start processing [Name]: %s \n", name)
+
+				atomic.AddInt32(&waitCount, 1)
 				g.Go(func() error {
-					return s.processSpan(resSpan, scopeSpan, span, dataDigChan)
+					err := s.processSpan(resSpan, scopeSpan, span, processSpanChan)
+					//if err != nil {
+					//	atomic.AddInt32(&waitCount, -1)
+					//}
+					return err
+
 				})
 
 			}
 		}
 	}
+	/*
+		if err := g.Wait(); err != nil {
+			log.Printf("Error occured during SpanExport %v \n", err)
+			return &coltracepb.ExportTraceServiceResponse{}, err
+		}*/
 
-	if err := g.Wait(); err != nil {
-		log.Printf("Error occured during SpanExport %v \n", err)
-		return &coltracepb.ExportTraceServiceResponse{}, err
-	}
-
-	err := s.saveDogDig(dataDigChan)
+	err := s.saveTrace(processSpanChan, waitCount)
 	if err != nil {
-		log.Printf("Error occured during saveDogDig %v \n", err)
+		log.Printf("Error occured during saveTrace %v \n", err)
 		return &coltracepb.ExportTraceServiceResponse{}, err
 	}
 

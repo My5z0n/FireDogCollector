@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/ClickHouse/clickhouse-go/v2"
 	"github.com/My5z0n/FireDogCollector/OtelCollector/models"
+	"time"
 )
 
 type TraceRepository struct {
@@ -46,7 +47,7 @@ func (r *TraceRepository) openConn() error {
 func (r *TraceRepository) SaveSpan(model models.ClickHouseSpan) error {
 	//comand := fmt.Sprintf("INSERT INTO trace ()")
 	//r.connection.AsyncInsert()
-	batch, err := r.connection.PrepareBatch(context.Background(), "INSERT INTO traces")
+	batch, err := r.connection.PrepareBatch(context.Background(), "INSERT INTO spans")
 	if err != nil {
 		return err
 	}
@@ -58,33 +59,28 @@ func (r *TraceRepository) SaveSpan(model models.ClickHouseSpan) error {
 	return batch.Send()
 }
 
-func (r *TraceRepository) SaveDogDig(paths [][]map[string]string, traceId string, attributes map[string]any) error {
+func (r *TraceRepository) SaveTrace(paths [][]map[string]string, traceId string, startTime time.Time) error {
 
 	//tmpSpan := flattenSpansList(paths)
 	flatSpan := flattenSpansList(paths)[0]
 	//TODO: Handle many paths
 	fmt.Println(flatSpan)
 
-	columnNames := []string{}
-
-	tmparr := []any{traceId, flatSpan, paths}
-
-	for k, v := range attributes {
-		columnNames = append(columnNames, r.mapper[k])
-		tmparr = append(tmparr, v)
-
-	}
-
-	params := "trace_id, paths, pathsArray"
-	for _, v := range columnNames {
-		params = fmt.Sprintf("%s,%s", params, v)
-	}
-
-	batch, err := r.connection.PrepareBatch(context.Background(), fmt.Sprintf("INSERT INTO dogdig (%s)", params))
+	batch, err := r.connection.PrepareBatch(context.Background(), "INSERT INTO traces ")
 	if err != nil {
 		return err
 	}
-	err = batch.Append(tmparr...)
+	err = batch.AppendStruct(&struct {
+		trace_id    string
+		paths       string
+		paths_array [][]map[string]string
+		start_time  time.Time
+	}{
+		trace_id:    traceId,
+		paths:       flatSpan,
+		paths_array: paths,
+		start_time:  startTime,
+	})
 
 	if err != nil {
 		return err
