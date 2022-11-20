@@ -59,9 +59,8 @@ func (r *TraceRepository) SaveSpan(model models.ClickHouseSpan) error {
 	return batch.Send()
 }
 
-func (r *TraceRepository) SaveTrace(paths [][]map[string]string, traceId string, startTime time.Time) error {
+func (r *TraceRepository) SaveTrace(paths [][]map[string]string, traceId string, startTime time.Time, jsonSpans string) error {
 
-	//tmpSpan := flattenSpansList(paths)
 	flatSpan := flattenSpansList(paths)[0]
 	//TODO: Handle many paths
 	fmt.Println(flatSpan)
@@ -71,15 +70,17 @@ func (r *TraceRepository) SaveTrace(paths [][]map[string]string, traceId string,
 		return err
 	}
 	err = batch.AppendStruct(&struct {
-		trace_id    string
-		paths       string
-		paths_array [][]map[string]string
-		start_time  time.Time
+		Trace     string                `ch:"trace_id"`
+		Paths     string                `ch:"paths"`
+		Array     [][]map[string]string `ch:"paths_array"`
+		StartTime time.Time             `ch:"start_time"`
+		JsonSpans string                `ch:"json_spans"`
 	}{
-		trace_id:    traceId,
-		paths:       flatSpan,
-		paths_array: paths,
-		start_time:  startTime,
+		Trace:     traceId,
+		Paths:     flatSpan,
+		Array:     paths,
+		StartTime: startTime,
+		JsonSpans: jsonSpans,
 	})
 
 	if err != nil {

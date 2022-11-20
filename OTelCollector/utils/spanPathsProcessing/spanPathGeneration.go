@@ -2,9 +2,20 @@ package spanPathsProcessing
 
 import (
 	"github.com/My5z0n/FireDogCollector/OtelCollector/models"
+	"time"
 )
 
-func GeneratePathsFromSpans(graph map[string]models.SpanTag, spanChilds []string) [][]map[string]string {
+type SpanElementJSON struct {
+	SpanID    string
+	SpanName  string
+	startTime time.Time
+	endTime   time.Time
+	Child     []SpanElementJSON
+}
+
+//func Unroll(spanMap map[string]*models.Span, root string) [][]map[string]string
+
+func GeneratePathsFromSpans(graph map[string]*models.Span, spanChilds []string) [][]map[string]string {
 
 	list := [][]map[string]string{}
 
@@ -27,13 +38,13 @@ func reverse(s []map[string]string) {
 	}
 }
 
-func searchUP(graph map[string]models.SpanTag, id string) []map[string]string {
+func searchUP(graph map[string]*models.Span, id string) []map[string]string {
 
-	v, _ := graph[id]
-	if v.Span_Name != "" {
-		ret := searchUP(graph, v.Parent_Span_id)
+	//v, _ := graph[id]
+	if v, ok := graph[id]; ok {
+		ret := searchUP(graph, v.SpanProperties.Parent_Span_id)
 		return append([]map[string]string{{
-			"span_name": v.Span_Name,
+			"span_name": v.SpanProperties.Span_Name,
 			"span_id":   id,
 		}}, ret...)
 

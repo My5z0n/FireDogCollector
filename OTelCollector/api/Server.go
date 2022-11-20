@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"github.com/My5z0n/FireDogCollector/OtelCollector/models"
 	"github.com/My5z0n/FireDogCollector/OtelCollector/repository"
@@ -60,18 +61,29 @@ func (s *Server) processSpan(resource *v1.ResourceSpans, scope *v1.ScopeSpans, s
 	return err
 }
 
-func (s *Server) saveTrace(dataDigChan <-chan models.ClickHouseSpan, counter int32) error {
+func (s *Server) saveTrace(inputProcessedSpansChan <-chan models.ClickHouseSpan, counter int32) error {
 
-	spanDependencyMap := make(map[string]models.SpanTag)
-	spanChildCounter := make(map[string]int)
-	spanLeafList := []string{}
-	currentTraceID := ""
 	var startTime time.Time
+	var currentTraceID string
+	var spanRoot string
+	spanLeafList := []string{}
+
+	spansMap := make(map[string]*models.Span)
 
 	for counter > 0 {
 		//Load next Span
-		v := <-dataDigChan
+		v := <-inputProcessedSpansChan
 		counter -= 1
+
+		vSpan := models.SpanAttributes{
+			Start_time:     v.Start_time,
+			End_time:       v.End_time,
+			Span_Name:      v.Span_name,
+			Parent_Span_id: v.Parent_span_id,
+		}
+		if vSpan.Parent_Span_id == "" {
+			spanRoot = v.Span_id
+		}
 
 		//Check traceID
 		if currentTraceID == "" {
@@ -82,30 +94,34 @@ func (s *Server) saveTrace(dataDigChan <-chan models.ClickHouseSpan, counter int
 			continue
 		}
 
-		//Count child spans
-		spanChildCounter[v.Parent_span_id] = spanChildCounter[v.Parent_span_id] + 1
-		if _, ok := spanChildCounter[v.Span_id]; !ok {
-			spanChildCounter[v.Span_id] = 0
+		//Register Span
+		if _, ok := spansMap[v.Span_id]; !ok {
+			spansMap[v.Span_id] = &models.Span{
+				SpanProperties: &vSpan,
+				SpanChildren:   make([]*models.Span, 0),
+			}
+		} else {
+			spansMap[v.Span_id].SpanProperties = &vSpan
 		}
 
-		//Save span node
-		spanDependencyMap[v.Span_id] = models.SpanTag{
-			Start_time:     v.Start_time,
-			Span_Name:      v.Span_name,
-			Parent_Span_id: v.Parent_span_id,
+		//AddRelation
+		if _, ok := spansMap[v.Parent_span_id]; ok {
+			spansMap[v.Parent_span_id].SpanChildren = append(spansMap[v.Parent_span_id].SpanChildren, spansMap[v.Span_id])
+		} else if v.Parent_span_id != "" {
+			spansMap[v.Parent_span_id] = &models.Span{SpanChildren: []*models.Span{spansMap[v.Span_id]}}
 		}
-
 	}
 
 	//Get span leafs
-	for k, v := range spanChildCounter {
-		if v == 0 {
+	for k, v := range spansMap {
+		if len(v.SpanChildren) == 0 {
 			spanLeafList = append(spanLeafList, k)
 		}
 	}
 
-	paths := spanPathsProcessing.GeneratePathsFromSpans(spanDependencyMap, spanLeafList)
-	err := s.TraceRepository.SaveTrace(paths, currentTraceID, startTime)
+	paths := spanPathsProcessing.GeneratePathsFromSpans(spansMap, spanLeafList)
+	str, _ := json.Marshal(spansMap[spanRoot])
+	err := s.TraceRepository.SaveTrace(paths, currentTraceID, startTime, string(str))
 	return err
 }
 
