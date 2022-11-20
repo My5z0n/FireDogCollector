@@ -1,0 +1,20 @@
+info:
+  contact: {}
+paths:
+  /traces:
+    get:
+      consumes:
+      - application/json
+      description: do ping
+      parameters:
+      - description: page
+        in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses: {}
+      summary: ping example
+      tags:
+      - example
+swagger: "2.0"

@@ -11,9 +11,14 @@ type ClickHouseSpan struct {
 	End_time       time.Time      `ch:"end_time"`
 	Attributes     map[string]any `ch:"attributes"`
 }
+type Span struct {
+	SpanProperties *SpanAttributes
+	SpanChildren   []*Span
+}
 
-type SpanTag struct {
+type SpanAttributes struct {
 	Start_time     time.Time
+	End_time       time.Time
 	Span_Name      string
 	Parent_Span_id string
 }
