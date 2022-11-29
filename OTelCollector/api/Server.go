@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/My5z0n/FireDogCollector/OtelCollector/models"
 	"github.com/My5z0n/FireDogCollector/OtelCollector/repository"
+	"github.com/My5z0n/FireDogCollector/OtelCollector/utils"
 	"github.com/My5z0n/FireDogCollector/OtelCollector/utils/spanPathsProcessing"
 	coltracepb "go.opentelemetry.io/proto/otlp/collector/trace/v1"
 	commonpb "go.opentelemetry.io/proto/otlp/common/v1"
@@ -26,34 +27,44 @@ type Server struct {
 func (s *Server) processSpan(resource *v1.ResourceSpans, scope *v1.ScopeSpans, span *v1.Span, processedSpanResultChan chan<- models.ClickHouseSpan) error {
 
 	attributesMap := make(map[string]any)
+	externalParamNames := make([]string, 0, 10)
 	for i, v := range span.Attributes {
-		switch k := span.Attributes[i].GetValue().GetValue().(type) {
-		case *commonpb.AnyValue_StringValue:
-			attributesMap[v.Key] = k.StringValue
-		case *commonpb.AnyValue_BoolValue:
-			attributesMap[v.Key] = k.BoolValue
-		case *commonpb.AnyValue_IntValue:
-			attributesMap[v.Key] = k.IntValue
-		case *commonpb.AnyValue_DoubleValue:
-			attributesMap[v.Key] = k.DoubleValue
-		case *commonpb.AnyValue_BytesValue:
-			attributesMap[v.Key] = hex.EncodeToString(k.BytesValue)
-		case nil:
-		default:
+		if utils.CheckColNames(v.Key) {
+			switch k := span.Attributes[i].GetValue().GetValue().(type) {
+			case *commonpb.AnyValue_StringValue:
+				attributesMap[v.Key] = k.StringValue
+				externalParamNames = append(externalParamNames, v.Key)
+			case *commonpb.AnyValue_BoolValue:
+				attributesMap[v.Key] = k.BoolValue
+				externalParamNames = append(externalParamNames, v.Key)
+			case *commonpb.AnyValue_IntValue:
+				attributesMap[v.Key] = k.IntValue
+				externalParamNames = append(externalParamNames, v.Key)
+			case *commonpb.AnyValue_DoubleValue:
+				attributesMap[v.Key] = k.DoubleValue
+				externalParamNames = append(externalParamNames, v.Key)
+			case *commonpb.AnyValue_BytesValue:
+				attributesMap[v.Key] = hex.EncodeToString(k.BytesValue)
+				externalParamNames = append(externalParamNames, v.Key)
+			case nil:
+			default:
+			}
 		}
+
 	}
 
 	//obj, errr := json.Marshal(attributesMap)
 	//fmt.Println("Marshal Datasets Result : ", string(obj), errr)
 
 	model := models.ClickHouseSpan{
-		Trace_id:       hex.EncodeToString(span.TraceId),
-		Span_id:        hex.EncodeToString(span.SpanId),
-		Parent_span_id: hex.EncodeToString(span.ParentSpanId),
-		Span_name:      span.Name,
-		Start_time:     time.Unix(0, int64(span.StartTimeUnixNano)),
-		End_time:       time.Unix(0, int64(span.EndTimeUnixNano)),
-		Attributes:     attributesMap,
+		Trace_id:         hex.EncodeToString(span.TraceId),
+		Span_id:          hex.EncodeToString(span.SpanId),
+		Parent_span_id:   hex.EncodeToString(span.ParentSpanId),
+		Span_name:        span.Name,
+		Start_time:       time.Unix(0, int64(span.StartTimeUnixNano)),
+		End_time:         time.Unix(0, int64(span.EndTimeUnixNano)),
+		ExternalColNames: externalParamNames,
+		Attributes:       attributesMap,
 	}
 	processedSpanResultChan <- model
 	err := s.TraceRepository.SaveSpan(model)
@@ -155,11 +166,11 @@ func (s *Server) Export(ctx context.Context, request *coltracepb.ExportTraceServ
 			}
 		}
 	}
-	/*
-		if err := g.Wait(); err != nil {
-			log.Printf("Error occured during SpanExport %v \n", err)
-			return &coltracepb.ExportTraceServiceResponse{}, err
-		}*/
+
+	if err := g.Wait(); err != nil {
+		log.Printf("Error occured during SpanExport %v \n", err)
+		return &coltracepb.ExportTraceServiceResponse{}, err
+	}
 
 	err := s.saveTrace(processSpanChan, waitCount)
 	if err != nil {

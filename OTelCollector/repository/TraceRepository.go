@@ -2,9 +2,13 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/ClickHouse/clickhouse-go/v2"
+	"github.com/ClickHouse/clickhouse-go/v2/lib/driver"
 	"github.com/My5z0n/FireDogCollector/OtelCollector/models"
+	"github.com/My5z0n/FireDogCollector/OtelCollector/utils"
+	"regexp"
 	"time"
 )
 
@@ -12,7 +16,6 @@ type TraceRepository struct {
 	port       string
 	database   string
 	connection clickhouse.Conn
-	mapper     map[string]string
 }
 
 func NewTraceRepository(port string, database string) (TraceRepository, error) {
@@ -20,12 +23,6 @@ func NewTraceRepository(port string, database string) (TraceRepository, error) {
 		port:     port,
 		database: database,
 	}
-	t.mapper = map[string]string{
-		"firedog.test1": "firedog_test1",
-		"firedog.test2": "firedog_test2",
-		"firedog.test3": "firedog_test3",
-	}
-
 	return t, t.openConn()
 }
 
@@ -44,14 +41,66 @@ func (r *TraceRepository) openConn() error {
 	return nil
 }
 
+func (r *TraceRepository) buildInsertSpanQuery(model models.ClickHouseSpan) (string, []any) {
+	query := `INSERT INTO spans (trace_id,span_id,parent_span_id,span_name,start_time,end_time`
+
+	keys := model.ExternalColNames
+	args := []any{model.Trace_id, model.Span_id, model.Parent_span_id, model.Span_name, model.Start_time, model.End_time}
+
+	for _, v := range keys {
+		args = append(args, model.Attributes[v])
+		query = fmt.Sprintf("%s,%s", query, v)
+	}
+	query = fmt.Sprintf("%s)", query)
+
+	return query, args
+
+}
+
+func (r *TraceRepository) prepareSpanBatch(query string, model models.ClickHouseSpan) (driver.Batch, error) {
+	var batch driver.Batch
+	var err error
+	for {
+		batch, err = r.connection.PrepareBatch(context.Background(), query)
+		if err != nil {
+			ret := regexp.MustCompile(`No such column (.*?) in table`).FindAllStringSubmatch(err.Error(), -1)
+
+			if len(ret) == 0 {
+				return nil, err
+			}
+
+			missingColName := ret[0][1]
+			if v, ok := model.Attributes[missingColName]; !ok {
+				return nil, errors.New("Unable to create Span Batch")
+			} else {
+				var t string
+				err, t = utils.GetTypeName(v)
+
+				if err != nil {
+					return nil, err
+				}
+
+				err = r.connection.Exec(context.Background(), fmt.Sprintf("ALTER TABLE spans ADD COLUMN IF NOT EXISTS %s Nullable(%s);", missingColName, t))
+				if err != nil {
+					return nil, err
+				}
+			}
+		} else {
+			return batch, nil
+		}
+	}
+
+}
+
 func (r *TraceRepository) SaveSpan(model models.ClickHouseSpan) error {
-	//comand := fmt.Sprintf("INSERT INTO trace ()")
-	//r.connection.AsyncInsert()
-	batch, err := r.connection.PrepareBatch(context.Background(), "INSERT INTO spans")
+	query, argList := r.buildInsertSpanQuery(model)
+
+	batch, err := r.prepareSpanBatch(query, model)
 	if err != nil {
 		return err
 	}
-	err = batch.AppendStruct(&model)
+
+	err = batch.Append(argList...)
 	if err != nil {
 		return err
 	}
