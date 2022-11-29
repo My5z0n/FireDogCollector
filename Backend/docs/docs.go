@@ -26,7 +26,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "example"
+                    "Trace"
                 ],
                 "summary": "ping example",
                 "parameters": [
@@ -35,6 +35,28 @@ const docTemplate = `{
                         "description": "page",
                         "name": "page",
                         "in": "query"
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/traces/{traceid}": {
+            "get": {
+                "description": "Return specific Trace with spans tree and detected anomaly",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Trace"
+                ],
+                "summary": "Get specific Trace",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Trace ID",
+                        "name": "traceid",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {}

@@ -16,7 +16,7 @@ type TraceController struct {
 // @Summary ping example
 // @Schemes
 // @Description do ping
-// @Tags example
+// @Tags Trace
 // @Accept json
 // @Produce json
 // @Param page query int false "page"
@@ -42,14 +42,13 @@ func (c TraceController) GetAll(ctx *gin.Context) {
 }
 
 // GetOne godoc
-// @Summary ping example
+// @Summary Get specific Trace
 // @Schemes
-// @Description do ping
-// @Tags example
-// @Accept json
+// @Description Return specific Trace with spans tree and detected anomaly
+// @Tags Trace
 // @Produce json
-// @Param page query int false "page"
-// @Router /traces/:traceid [get]
+// @Param traceid path string true "Trace ID"
+// @Router /traces/{traceid} [get]
 // @host localhost:9900
 func (c TraceController) GetOne(ctx *gin.Context) {
 	binding := struct {

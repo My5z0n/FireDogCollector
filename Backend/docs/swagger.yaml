@@ -16,5 +16,20 @@ paths:
       responses: {}
       summary: ping example
       tags:
-      - example
+      - Trace
+  /traces/{traceid}:
+    get:
+      description: Return specific Trace with spans tree and detected anomaly
+      parameters:
+      - description: Trace ID
+        in: path
+        name: traceid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: Get specific Trace
+      tags:
+      - Trace
 swagger: "2.0"
