@@ -87,10 +87,11 @@ func (s *Server) saveTrace(inputProcessedSpansChan <-chan models.ClickHouseSpan,
 		counter -= 1
 
 		vSpan := models.SpanAttributes{
-			Start_time:     v.Start_time,
-			End_time:       v.End_time,
+			Span_ID:        v.Span_id,
 			Span_Name:      v.Span_name,
 			Parent_Span_id: v.Parent_span_id,
+			Start_time:     v.Start_time,
+			End_time:       v.End_time,
 		}
 		if vSpan.Parent_Span_id == "" {
 			spanRoot = v.Span_id

@@ -18,8 +18,11 @@ type Span struct {
 }
 
 type SpanAttributes struct {
-	Start_time     time.Time
-	End_time       time.Time
-	Span_Name      string
-	Parent_Span_id string
+	Span_ID            string
+	Span_Name          string
+	Parent_Span_id     string
+	Start_time         time.Time
+	End_time           time.Time
+	Anomaly            bool
+	Expected_Span_Name string
 }
