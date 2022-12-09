@@ -19,4 +19,7 @@ func (s Sever) AttachControllers() {
 	tracesRoute.GET("/", s.Controllers.TraceControllers.GetAll)
 	tracesRoute.GET("/:traceid/", s.Controllers.TraceControllers.GetOne)
 
+	spanRoute := s.RouterGroup.Group("/spans")
+	spanRoute.GET("/:spanid/", s.Controllers.SpanControllers.GetOne)
+
 }
