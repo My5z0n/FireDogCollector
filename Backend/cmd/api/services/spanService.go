@@ -8,7 +8,10 @@ type SpanService struct {
 
 func (s SpanService) GetSpan(id string) interface{} {
 
-	result := s.Models.SpanRepository.GetSpan(id)
+	result, err := s.Models.SpanRepository.GetSpan(id)
+	if err != nil {
+		return err
+	}
 	return result
 
 }

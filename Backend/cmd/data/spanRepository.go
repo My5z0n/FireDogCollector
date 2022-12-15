@@ -11,32 +11,32 @@ type SpanRepository struct {
 	DB driver.Conn
 }
 
-func (m SpanRepository) GetSpan(spanID string) interface{} {
+func (m SpanRepository) GetSpan(spanID string) (*models.Span, error) {
 
 	query := `SELECT * from spans WHERE span_id = ?`
-	//result = []dto.TracesListElement{}
 
 	rows, err := m.DB.Query(context.Background(), query, spanID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	var columnTypes = rows.ColumnTypes()
 	var columnNames = rows.Columns()
-	var vars = make([]interface{}, len(columnTypes))
-
-	var ResultSpan = models.Span{Attributes: make(map[string]any)}
+	var additionalAttributes = make([]interface{}, len(columnTypes))
 
 	for i := range columnTypes {
-		vars[i] = reflect.New(columnTypes[i].ScanType()).Interface()
+		additionalAttributes[i] = reflect.New(columnTypes[i].ScanType()).Interface()
 	}
 
 	rows.Next()
-	if err := rows.Scan(vars...); err != nil {
-		return err
-	}
-	for i, v := range columnNames {
-		ResultSpan.SetAttribute(v, vars[i])
+	if err := rows.Scan(additionalAttributes...); err != nil {
+		return nil, err
 	}
 
-	return ResultSpan.Attributes
+	var ResultSpan = models.Span{Attributes: make(map[string]any)}
+
+	for i, colName := range columnNames {
+		ResultSpan.SetAttribute(colName, additionalAttributes[i])
+	}
+
+	return &ResultSpan, nil
 }

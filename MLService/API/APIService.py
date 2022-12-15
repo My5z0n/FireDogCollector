@@ -1,7 +1,7 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 hostName = "localhost"
-serverPort = 9080
+serverPort = 9181
 
 
 class MyServer(BaseHTTPRequestHandler):
@@ -15,9 +15,7 @@ class MyServer(BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header("Content-type", "text/html")
         self.end_headers()
-
-
-
+        
 def Init(q):
     x = MyServer
     x.process_queue = q

@@ -12,7 +12,7 @@ type TraceService struct {
 
 // TODO: Handle Errors if err!= nil
 func (s TraceService) GetTracesWithAnomalies(page int) []dto.TracesListElement {
-	PageSize := 2
+	PageSize := 5
 
 	result := s.Models.TraceRepository.GetTracesWithAnomalies(page*PageSize, PageSize)
 	return result
