@@ -1,13 +1,12 @@
 package controllers
 
 import (
-	"fmt"
 	"github.com/My5z0n/FireDogCollector/Backend/cmd/api/services"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
-type SpanController struct {
+type AnomalyDetectorController struct {
 	Services services.Services
 }
 
@@ -20,20 +19,17 @@ type SpanController struct {
 // @Param spanid path string true "Span ID"
 // @Router /spans/{spanid} [get]
 // @host localhost:9900
-func (c SpanController) GetOne(ctx *gin.Context) {
-	binding := struct {
-		SpanID string `uri:"spanid" binding:"required"`
-	}{}
+func (c AnomalyDetectorController) InitLearningModel(ctx *gin.Context) {
 
-	err := ctx.ShouldBindUri(&binding)
+	resp, err := http.Get("http://localhost/9181/START_TRAIN")
 	if err != nil {
-		//TODO: PROPERLY HANDLE ERRORS
-		fmt.Printf("ERR: %v", err)
-		return
+		//TODO: HANDLE ERROR
 	}
 
-	res := c.Services.SpanService.GetSpan(binding.SpanID)
+	ctx.JSON(http.StatusOK, resp)
+}
 
-	ctx.JSON(http.StatusOK, res)
+func (c AnomalyDetectorController) StartRestartModelLearning(ctx *gin.Context) {
 
+	ctx.JSON(http.StatusOK, "OK")
 }

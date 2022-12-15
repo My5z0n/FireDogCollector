@@ -12,4 +12,5 @@ type Trace struct {
 	Paths      string               `ch:"paths"`
 	PathsArray [][]PathArrayElement `ch:"paths_array"`
 	StartTime  time.Time            `ch:"start_time"`
+	JsonSpans  string               `ch:"json_spans"`
 }

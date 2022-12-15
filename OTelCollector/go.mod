@@ -4,8 +4,8 @@ go 1.19
 
 require (
 	github.com/ClickHouse/clickhouse-go/v2 v2.3.0
-	github.com/rabbitmq/amqp091-go v1.5.0
 	go.opentelemetry.io/proto/otlp v0.19.0
+	golang.org/x/exp v0.0.0-20221126150942-6ab00d035af9
 	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4
 	google.golang.org/grpc v1.42.0
 )
@@ -27,7 +27,7 @@ require (
 	go.opentelemetry.io/otel v1.9.0 // indirect
 	go.opentelemetry.io/otel/trace v1.9.0 // indirect
 	golang.org/x/net v0.0.0-20210405180319-a5a99cb37ef4 // indirect
-	golang.org/x/sys v0.0.0-20220811171246-fbc7d0a398ab // indirect
+	golang.org/x/sys v0.1.0 // indirect
 	golang.org/x/text v0.3.5 // indirect
 	google.golang.org/genproto v0.0.0-20211118181313-81c1377c94b1 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect

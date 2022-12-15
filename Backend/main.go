@@ -7,11 +7,13 @@ import (
 	"github.com/My5z0n/FireDogCollector/Backend/cmd/api/services"
 	"github.com/My5z0n/FireDogCollector/Backend/cmd/data"
 	docs "github.com/My5z0n/FireDogCollector/Backend/docs"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+
 	"os"
 	"time"
 )
@@ -29,6 +31,13 @@ func main() {
 	dataModels := data.NewModels(dbConnection)
 	s := services.NewServices(dataModels)
 	c := controllers.NewControllers(s)
+
+	//Add CORS
+	ginEngine.Use(cors.New(cors.Config{
+		AllowOrigins: []string{"*"},
+		AllowMethods: []string{"*"},
+		AllowHeaders: []string{"*"},
+	}))
 
 	mainServer := server.CreateNew(ginEngine, dataModels, s, c)
 
