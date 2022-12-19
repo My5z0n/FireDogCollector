@@ -27,10 +27,14 @@ func (s SpanService) GetSpansListFromTraceID(id string) ([]dto.SpanListElementDT
 	}
 	prediction, err := s.Models.PredictionsRepository.GetAnomalyFromTraceID(id)
 	if err != nil {
-		//TODO
-		//if err.Error() == "NotFound..."
-		//return nil, err
-		return spans, nil
+		//Not Found
+		if err.Error() == "EOF" {
+			return spans, nil
+		} else {
+			return nil, err
+		}
+		//
+
 	}
 	prediction.FitToSpans(spans)
 

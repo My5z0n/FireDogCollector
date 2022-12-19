@@ -19,6 +19,7 @@ func (r PredictionsRepository) GetAnomalyFromTraceID(trace_id string) (*models.P
 
 		return nil, err
 	}
+
 	anomaly := models.Predictions{}
 	err = row.ScanStruct(&anomaly)
 	if err != nil {
