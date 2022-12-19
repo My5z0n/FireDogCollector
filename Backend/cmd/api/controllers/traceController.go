@@ -62,8 +62,13 @@ func (c TraceController) GetOne(ctx *gin.Context) {
 		return
 	}
 
-	res := c.Services.TraceService.GetSingleTraceWithAnomalies(binding.TraceID)
+	traces := c.Services.TraceService.GetSingleTraceWithAnomalyPrediction(binding.TraceID)
+	spans, err := c.Services.SpanService.GetSpansListFromTraceID(binding.TraceID)
+	if err != nil {
+		fmt.Printf("ERR: %v", err)
+	}
+	traces.SpansList = spans
 
-	ctx.JSON(http.StatusOK, res)
+	ctx.JSON(http.StatusOK, traces)
 
 }

@@ -19,7 +19,7 @@ func (s TraceService) GetTracesWithAnomalies(page int) []dto.TracesListElement {
 
 }
 
-func (s TraceService) GetSingleTraceWithAnomalies(traceID string) dto.TraceModelDTO {
+func (s TraceService) GetSingleTraceWithAnomalyPrediction(traceID string) dto.TraceModelDTO {
 
 	trace, err := s.Models.TraceRepository.GetSingleTrace(traceID)
 	if trace == nil {
@@ -43,7 +43,7 @@ func (s TraceService) GetSingleTraceWithAnomalies(traceID string) dto.TraceModel
 	result := dto.TraceModelDTO{
 		TraceID:   trace.TraceID,
 		StartTime: trace.StartTime,
-		Spans:     jsonMap,
+		SpansMap:  jsonMap,
 	}
 	if anomaly != nil && anomaly.AnomalyDetected.Bool == true {
 		result.ModifyAnomalySpans(anomaly.SpanID, anomaly.ExpectedSpanName)

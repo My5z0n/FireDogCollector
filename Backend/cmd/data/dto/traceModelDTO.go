@@ -1,17 +1,20 @@
 package dto
 
-import "time"
+import (
+	"time"
+)
 
 type TraceModelDTO struct {
 	TraceID   string
 	StartTime time.Time
 	Anomaly   bool
-	Spans     map[string]any
+	SpansList []SpanListElementDTO
+	SpansMap  map[string]any
 }
 
 func (r *TraceModelDTO) ModifyAnomalySpans(spanID string, expectedSpanName string) {
 
-	if dfsScan(r.Spans, spanID, expectedSpanName) {
+	if dfsScan(r.SpansMap, spanID, expectedSpanName) {
 		r.Anomaly = true
 	} else {
 		print("notFound")
