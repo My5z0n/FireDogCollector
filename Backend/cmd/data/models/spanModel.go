@@ -21,8 +21,8 @@ func (s *Span) MakeDTO() dto.SpanListElementDTO {
 		SpanID:                  s.SpanID,
 		ParentSpanID:            s.ParentSpanID,
 		SpanName:                s.SpanName,
-		StartTime:               time.Time{},
-		EndTime:                 time.Time{},
+		StartTime:               s.StartTime,
+		EndTime:                 s.EndTime,
 		AnomalyDetected:         false,
 		ExpectedAnomalySpanName: "",
 	}
