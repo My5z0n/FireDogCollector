@@ -14,14 +14,10 @@ func (r PredictionsRepository) GetAnomalyFromTraceID(trace_id string) (*models.P
 
 	query := `SELECT * from predictions WHERE trace_id = ?`
 
-	row, err := r.DB.Query(context.Background(), query, trace_id)
-	if err != nil {
-
-		return nil, err
-	}
+	row := r.DB.QueryRow(context.Background(), query, trace_id)
 
 	anomaly := models.Predictions{}
-	err = row.ScanStruct(&anomaly)
+	err := row.ScanStruct(&anomaly)
 	if err != nil {
 		return nil, err
 	}

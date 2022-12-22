@@ -28,7 +28,7 @@ func (s SpanService) GetSpansListFromTraceID(id string) ([]dto.SpanListElementDT
 	prediction, err := s.Models.PredictionsRepository.GetAnomalyFromTraceID(id)
 	if err != nil {
 		//Not Found
-		if err.Error() == "EOF" {
+		if err.Error() == "sql: no rows in result set" {
 			return spans, nil
 		} else {
 			return nil, err
