@@ -36,7 +36,5 @@
 
   <style>
 
-    td {
-        
-    }
+ 
   </style>

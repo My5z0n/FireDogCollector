@@ -8,7 +8,7 @@
 		}
 	}
 	export let resultArray = [];
-	export let GetTraceAddresses= 'http://localhost:9900/api/v1/traces/';
+	export let GetTraceAddresses= 'http://127.0.0.1:9900/api/v1/traces/';
 	export let GetTraceAddressesGet= '';
 	export let testData = ""
 
@@ -40,7 +40,7 @@
 <tbody>
 	{#each testData as { TraceID, StartTime,Anomaly }}
 	<tr>
-	<td><span class="badge bg-info">More Info</span></td>
+	<td><a type="button" class="btn btn-info btn-sm" href={"/trace/"+TraceID}>More Info</a></td>
 	  <td>{TraceID}</td>
 	  <td>{new Date(StartTime).toISOString()}</td>
 	  {#if Anomaly.Valid}
