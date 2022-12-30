@@ -26,29 +26,22 @@
         TreeChart,
         TreeController
     );
+    import ChartDataLabels from "chartjs-plugin-datalabels";
+    Chart.register(ChartDataLabels);
     Chart.defaults.plugins.legend.display = false;
 
     import { onMount } from "svelte";
 
     export let SpanList = [];
 
-    let type = "dendogram";
-    let pg = undefined;
+    let GraphType = "dendogram";
+    let mountedCanvas = undefined;
 
-    export let NewSpanList = [
-        { name: "1" },
-        { name: "2", parent: 0 },
-        { name: "3", parent: 1 },
-        { name: "4", parent: 2 },
-        { name: "5", parent: 2 },
-        { name: "6", parent: 3 },
-        { name: "7", parent: 4 },
-        { name: "8", parent: 5 },
-    ];
-    export let myChart;
+    export let NewSpanList = [];
+    export let mainChart;
     let chartCanvas;
     let config = {
-        type,
+        type: GraphType,
         data: {
             labels: NewSpanList.map((obj) => obj.name),
             datasets: [
@@ -57,13 +50,22 @@
                     pointRadius: 8,
                     pointHoverRadius: 10,
                     data: NewSpanList,
-                    pointHoverBorderColor: "Navy",
-                    //pointBackgroundColor: ["black", "rgb(255, 99, 132)"],
+
+                    clip: { left: 125, top: 0, right: 125, bottom: 0 },
                 },
             ],
         },
         options: {
+            layout: {
+                padding: {
+                    right: 100,
+                    left: 100,
+                },
+            },
             plugins: {
+                colors: {
+                    forceOverride: true,
+                },
                 tooltip: {
                     displayColors: false,
                     callbacks: {
@@ -77,17 +79,26 @@
                         },
                     },
                 },
+                datalabels: {
+                    anchor: "end",
+                    font: {
+                        size: 15,
+                        weight: "bold",
+                    },
+                    formatter: function (value, context) {
+                        return context.chart.data.labels[context.dataIndex];
+                    },
+                    offset: 18,
+                },
             },
         },
     };
 
     onMount(() => {
-        console.log("MMMM update!");
-        pg = chartCanvas.getContext("2d");
+        mountedCanvas = chartCanvas.getContext("2d");
     });
 
-    $: if (pg && SpanList.length > 0) {
-        let test = [];
+    $: if (mountedCanvas && SpanList.length > 0) {
         NewSpanList = SpanList.map((obj) => {
             let par = 0;
             let p_id = obj.parent_span_id;
@@ -95,15 +106,15 @@
                 par = SpanList.findIndex((x) => x.span_id == p_id);
                 return { name: obj.span_name, parent: par, ...obj };
             } else {
-                test = { name: obj.span_name, ...obj };
-                return test;
+                return { name: obj.span_name, ...obj };
             }
         });
-        console.log("New update!");
-        console.log(NewSpanList);
         config.data.datasets[0].data = NewSpanList;
+        config.data.datasets[0].pointBackgroundColor = NewSpanList.map((obj) =>
+            obj.AnomalyDetected ? "red" : "steelblue"
+        );
         config.data.labels = NewSpanList.map((obj) => obj.name);
-        myChart = new Chart(pg, config);
+        mainChart = new Chart(mountedCanvas, config);
     }
 </script>
 

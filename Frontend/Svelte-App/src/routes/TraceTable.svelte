@@ -1,16 +1,8 @@
 <script>
 	export let page;
-	class Login {
-		constructor(first, last,call) {
-			this.first = first
-			this.last = last
-			this.call = call
-		}
-	}
-	export let resultArray = [];
 	export let GetTraceAddresses= 'http://127.0.0.1:9900/api/v1/traces/';
 	export let GetTraceAddressesGet= '';
-	export let testData = ""
+	export let TracesList = ""
 
 	$: {
 	GetTraceAddressesGet = GetTraceAddresses+'?page='+page;
@@ -18,13 +10,11 @@
 	}
 
 	function setTable(){
-		console.log(GetTraceAddressesGet);
 		const getRandomUser = async () => {
 			fetch(GetTraceAddressesGet)
 			.then(response => response.json())
 			.then(data => {
-				console.log(data);
-				testData = data;
+				TracesList = data;
 			}).catch(error => {
 				 console.log(error);
 				 return [];
@@ -38,7 +28,7 @@
 
 
 <tbody>
-	{#each testData as { TraceID, StartTime,Anomaly }}
+	{#each TracesList as { TraceID, StartTime,Anomaly }}
 	<tr>
 	<td><a type="button" class="btn btn-info btn-sm" href={"/trace/"+TraceID}>More Info</a></td>
 	  <td>{TraceID}</td>
