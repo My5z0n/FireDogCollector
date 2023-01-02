@@ -1,40 +1,64 @@
-from multiprocessing import Process
-from multiprocessing import Queue
-
+import signal
+from multiprocessing import Process, Queue, Event
 from MLComponent.mlComponent import MLComponent
-
-import MsgReceiver.rabbitmqReceiver as rabbitmqReceiver
-import API.APIService as APIService
-
-
-def workMLComponent(q1, q2):
-    MLComponent(q1, q2).Process()
+from API.APIService import APIService
+from MsgReceiver.rabbitmqReceiver import RabbitmqReceiver
+from time import sleep
+from threading import Thread
 
 
-def work_API(q1):
-    APIService.Init(q1)
+def work_ml_component(span_queue: Queue, model_queue: Queue) ->None:
+    stop_event = Event()
+    signal.signal(signal.SIGINT, lambda: stop_event.set())
+    MLComponent(span_queue, model_queue, stop_event).process_messages()
 
 
-def work_Rabbit(q1):
-    rabbitmqReceiver.RabbitmqReceiver(q1).Lisen()
+def work_API(model_queue: Queue) -> None:
+    api = APIService(model_queue)
+    signal.signal(signal.SIGINT, lambda: Thread(
+        target=lambda: api.server.shutdown()).start())
+    api.Run()
 
 
-def main():
-    span_notification_queue = Queue()
-    start_model_queue = Queue()
+def work_rabbit(span_queue: Queue) -> None:
+    rabbit = RabbitmqReceiver(span_queue)
+    signal.signal(signal.SIGINT, lambda:
+                  Thread(target=lambda: rabbit.channel.stop_consuming()).start())
+    rabbit.Lisen()
 
-    consumer_process = Process(target=work_Rabbit, args=(span_notification_queue,))
-    consumer_process.start()
 
-    consumer_process = Process(target=work_API, args=(start_model_queue,))
-    consumer_process.start()
+class MainObj:
 
-    consumer_process = Process(target=workMLComponent,
-                               args=(span_notification_queue, start_model_queue))
-    consumer_process.start()
+    def close_handler(self) -> None:
+        print("Closing")
+        self.ml_process.join()
+        self.api_process.join()
+        self.rabbit_process.join()
+        print("Exiting")
+        exit()
 
-    print("LOL")
+    def init(self) -> None:
+        self.span_notification_queue = Queue()
+        self.start_model_queue = Queue()
+
+        self.rabbit_process = Process(
+            target=work_rabbit, args=(self.span_notification_queue, ))
+        self.rabbit_process.start()
+
+        self.api_process = Process(target=work_API,
+                                   args=(self.start_model_queue, ))
+        self.api_process.start()
+
+        self.ml_process = Process(target=work_ml_component,
+                                  args=(self.span_notification_queue, self.start_model_queue, ))
+        self.ml_process.start()
+
+        signal.signal(signal.SIGINT, self.close_handler)
+        print("Init")
+        while True:
+            sleep(1)
 
 
 if __name__ == "__main__":
-    main()
+    main = MainObj()
+    main.init()

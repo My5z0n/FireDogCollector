@@ -13,12 +13,13 @@ class Repository:
                                                     database=self.database,
                                                     query_limit=0)
 
-    def getPathsArray(self, trace_id=""):
+    def get_paths_array(self, trace_id=""):
         if self.client is not None:
             rule = ""
             if trace_id != "":
                 rule = f"WHERE trace_id='{trace_id}'"
-            data = self.client.query_np(f'SELECT pathsArray FROM dogdig {rule}')["pathsArray"]
+            data = self.client.query_np(f'SELECT pathsArray FROM dogdig {rule}')[
+                "pathsArray"]
             return data
         else:
             raise Exception("No DB connected")
