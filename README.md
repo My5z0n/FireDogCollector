@@ -1,4 +1,4 @@
-# FireDogCollector - 
+# FireDogCollector
 >FireDogCollector is a Full stack OpenTelemetry collector powered by Deep Learning and AI to detect recored anomalies in realtime. 
 >Additionally, the system will indicate the probable source of failure with the help of attribute occurrence statistics.
 >
