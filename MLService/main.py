@@ -24,7 +24,7 @@ def work_rabbit(span_queue: Queue) -> None:
     rabbit = RabbitmqReceiver(span_queue)
     signal.signal(signal.SIGINT, lambda:
                   Thread(target=lambda: rabbit.channel.stop_consuming()).start())
-    rabbit.Lisen()
+    rabbit.lisen()
 
 
 class MainObj:

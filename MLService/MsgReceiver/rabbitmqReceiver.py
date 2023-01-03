@@ -1,18 +1,18 @@
 import pika
 import json
 from time import sleep
-
+from multiprocessing import Queue
 
 class RabbitmqReceiver():
-    con = 'localhost'
-    exchange_name = 'newSpanToProcessNotification'
-    process_queue = None
-    queue_name = None
+    con: str = 'localhost'
+    exchange_name: str = 'newSpanToProcessNotification'
+    process_queue: Queue = None
+    queue_name: str = None
 
-    def __init__(self, procesQueue) -> None:
+    def __init__(self, procesQueue):
         self.process_queue = procesQueue
 
-    def Lisen(self):
+    def lisen(self) -> None:
         connection = pika.BlockingConnection(
             pika.ConnectionParameters(self.con))
         self.channel = connection.channel()
@@ -31,5 +31,5 @@ class RabbitmqReceiver():
 
         exit()
 
-    def callback(self, ch, method, properties, body):
+    def callback(self, ch, method, properties, body) -> None:
         self.process_queue.put(json.loads(body)["trace_id"])

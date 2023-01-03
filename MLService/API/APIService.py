@@ -1,6 +1,5 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import urlparse
-from time import sleep
 from multiprocessing import Queue
 hostName = "localhost"
 serverPort = 9181

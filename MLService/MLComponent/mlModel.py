@@ -11,19 +11,20 @@ from keras.layers import LSTM
 from keras.layers import Embedding
 import numpy as np
 from numpy import array
+from typing import Tuple
 
 PREDICT_CONST = 0.25
 
 
 class MLModel:
-    modelPath = ""
-    tokenizer = None
-    model = None
+    modelPath: str = ""
+    tokenizer: Tokenizer = None
+    model: Sequential = None
 
     def __init__(self, modelPath: str = './MLFiredogModel/', ):
         self.modelPath = modelPath
 
-    def loadModel(self, modelName):
+    def load_model(self, modelName: str = 'model') -> Exception:
         try:
             model = load_model(self.modelPath + modelName+'_model.h5')
             tokenizer = load(
@@ -34,7 +35,7 @@ class MLModel:
         except Exception as err:
             return err
 
-    def splitPaths(self, paths):
+    def split_paths(self, paths: list) -> list:
         lines = []
         length = 2 + 1  # 2 Previous calculate next
         for span in paths:
@@ -42,13 +43,13 @@ class MLModel:
                 lines.append(span[i - length:i])
         return lines
 
-    def learn(self, pathsArray, modelName):
+    def learn(self, pathsArray, modelName) -> Exception:
         try:
             tokenizer = Tokenizer(oov_token="<OOV>")
             tokenizer.fit_on_texts(pathsArray)
             vocab_size = len(tokenizer.word_index) + 1
 
-            lines = self.splitPaths(pathsArray)
+            lines = self.split_paths(pathsArray)
 
             sequences = tokenizer.texts_to_sequences(lines)
             sequences = array(sequences)
@@ -81,9 +82,9 @@ class MLModel:
         except Exception as e:
             return e
 
-    def predict(self, paths_array):
+    def predict(self, paths_array) -> Tuple[bool,str,str,str]:
         paths = [tmp["span_name"] for tmp in paths_array]
-        lines = self.splitPaths(paths)
+        lines = self.split_paths(paths)
         sequences = self.tokenizer.texts_to_sequences(lines)
         sequences = array(sequences)
 
@@ -95,7 +96,6 @@ class MLModel:
             ret = self.model.predict(x)
 
             yhat = np.argmax(ret, axis=1)
-            # yhat= ret.argsort(axis=1)
 
             out = sequences[i][-1]
             if ret[0][out] < PREDICT_CONST:
@@ -105,7 +105,6 @@ class MLModel:
                         out_word = word
                         break
                 return True, paths_array[no_path]["span_name"], paths_array[no_path]["span_id"], out_word
-                # print(f'{lines[i]} Predicted -> {out_word}')
 
 
 if __name__ == "__main__":
@@ -121,5 +120,5 @@ if __name__ == "__main__":
             new.append(p)
     # print(new)
     x = MLModel()
-    x.loadModel()
+    x.load_model()
     x.predict([paths[0]])
