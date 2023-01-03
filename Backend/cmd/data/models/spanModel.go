@@ -1,15 +1,31 @@
 package models
 
-import "time"
+import (
+	"github.com/My5z0n/FireDogCollector/Backend/cmd/data/dto"
+	"time"
+)
 
 type Span struct {
-	TraceID      string         `json:"trace_id"`
-	SpanID       string         `json:"span_id"`
-	ParentSpanID string         `json:"parent_span_id"`
-	SpanName     string         `json:"span_name"`
-	StartTime    time.Time      `json:"start_time"`
-	EndTime      time.Time      `json:"end_time"`
-	Attributes   map[string]any `json:"attributes"`
+	TraceID      string    `ch:"trace_id"`
+	SpanID       string    `ch:"span_id"`
+	ParentSpanID string    `ch:"parent_span_id"`
+	SpanName     string    `ch:"span_name"`
+	StartTime    time.Time `ch:"start_time"`
+	EndTime      time.Time `ch:"end_time"`
+	Attributes   map[string]any
+}
+
+func (s *Span) MakeDTO() dto.SpanListElementDTO {
+	return dto.SpanListElementDTO{
+		TraceID:                 s.TraceID,
+		SpanID:                  s.SpanID,
+		ParentSpanID:            s.ParentSpanID,
+		SpanName:                s.SpanName,
+		StartTime:               s.StartTime,
+		EndTime:                 s.EndTime,
+		AnomalyDetected:         false,
+		ExpectedAnomalySpanName: "",
+	}
 }
 
 func (s *Span) SetAttribute(name string, value any) {

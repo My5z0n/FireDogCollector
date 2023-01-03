@@ -28,21 +28,6 @@ func (m TraceRepository) GetTracesWithAnomalies(offset int, limit int) (result [
 	return
 }
 
-func (m TraceRepository) GetAnomaly(traceID string) (*models.Predictions, error) {
-	query := `select * from predictions WHERE trace_id = ?;`
-
-	var result models.Predictions
-
-	row := m.DB.QueryRow(context.Background(), query, traceID)
-	if err := row.ScanStruct(&result); err != nil {
-		if err.Error() == "sql: no rows in result set" {
-			return nil, nil
-		}
-		return nil, err
-	}
-	return &result, nil
-
-}
 func (m TraceRepository) GetSingleTrace(traceID string) (*models.Trace, error) {
 
 	query := `select * from traces WHERE trace_id = ?;`
