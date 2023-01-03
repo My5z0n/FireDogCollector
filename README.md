@@ -6,9 +6,9 @@
 >The aim of the master's thesis is to create a fully locally operating useful and new anomaly detection system using artificial intelligence.**
 
 ## General Information
-- The system collects telemetry from [OpenTelemetry](https://opentelemetry.io/) standard 
+- The system collects telemetry from [OpenTelemetry](https://opentelemetry.io/) standard. Click to learn more about traces and telemetry
 - An example of instrumented distributed system is in [this repository](https://github.com/My5z0n/SampleInstrumentationApp)
-- System uses Recursive Neural Networks implemented in form of LSTM gates from [Tensorflow](https://www.tensorflow.org/)
+- System uses Recursive Neural Networks implemented in form of LSTM gates from [Tensorflow](https://www.tensorflow.org/) to validate anomaly in traces
 
 ## Microservice Structure
 The system consists of microservice modules:
