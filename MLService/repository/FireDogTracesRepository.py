@@ -2,7 +2,7 @@ import clickhouse_connect
 
 
 class Repository:
-    client: clickhouse_connect.Client = None
+    client = None
     host: str = ""
     database: str = ""
 
@@ -18,8 +18,8 @@ class Repository:
             rule = ""
             if trace_id != "":
                 rule = f"WHERE trace_id='{trace_id}'"
-            data = self.client.query_np(f'SELECT pathsArray FROM dogdig {rule}')[
-                "pathsArray"]
+            data = self.client.query_np(f'SELECT paths_array FROM traces {rule}')[
+                "paths_array"]
             return data
         else:
             raise Exception("No DB connected")

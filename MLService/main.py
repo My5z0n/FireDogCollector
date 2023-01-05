@@ -9,27 +9,27 @@ from threading import Thread
 
 def work_ml_component(span_queue: Queue, model_queue: Queue) ->None:
     stop_event = Event()
-    signal.signal(signal.SIGINT, lambda: stop_event.set())
+    signal.signal(signal.SIGINT, lambda a, b: stop_event.set())
     MLComponent(span_queue, model_queue, stop_event).process_messages()
 
 
 def work_API(model_queue: Queue) -> None:
     api = APIService(model_queue)
-    signal.signal(signal.SIGINT, lambda: Thread(
+    signal.signal(signal.SIGINT, lambda a,b: Thread(
         target=lambda: api.server.shutdown()).start())
     api.Run()
 
 
 def work_rabbit(span_queue: Queue) -> None:
     rabbit = RabbitmqReceiver(span_queue)
-    signal.signal(signal.SIGINT, lambda:
+    signal.signal(signal.SIGINT, lambda a,b:
                   Thread(target=lambda: rabbit.channel.stop_consuming()).start())
     rabbit.lisen()
 
 
 class MainObj:
 
-    def close_handler(self) -> None:
+    def close_handler(self, a, b) -> None:
         print("Closing")
         self.ml_process.join()
         self.api_process.join()
@@ -55,6 +55,9 @@ class MainObj:
 
         signal.signal(signal.SIGINT, self.close_handler)
         print("Init")
+        sleep(5)
+        
+
         while True:
             sleep(1)
 
