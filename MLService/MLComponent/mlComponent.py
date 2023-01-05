@@ -28,14 +28,19 @@ class MLComponent:
             try:
                 ret = self.start_learning_queue.get_nowait()
                 if ret[0] == 'START_TRAIN':
+                    print("START TRAIN")
                     self.learn_model(ret[1])
                 elif ret[0] == 'LOAD_MODEL':
+                    print("LOAD MODEL")
                     self.load_model(ret[1])
+
             except queue.Empty:
                 pass
             try:
                 ret = self.new_span_notification_queue.get_nowait()
+                print("GOT NEW SPAN")
                 if self.model_ready is True:
+                    print("CALCULATE SPAN")
                     self.calculate_span(ret)
                 else:
                     pass
@@ -46,20 +51,24 @@ class MLComponent:
     def learn_model(self, modelName: str) -> None:
         data = self.repository.get_paths_array()
 
-        data = [v[0]["span_name"] for v in data]
+        ret_data = [[a['span_name'] for a in v[0]] for v in data]
 
-        err = self.model.learn(data, modelName)
+        err = self.model.learn(ret_data, modelName)
         if err != None:
-            self.model_ready = True
+            print(f"Error during model learning: {err}")
         else:
-            print("Error during model learning: "+err)
+            print("Model train succes!")
+            self.model_ready = True
+           
 
     def load_model(self, modelName: str) -> None:
         err = self.model.load_model(modelName)
         if err != None:
-            self.model_ready = True
+            print(f"Error during model load: {err}")
         else:
-            print("Error during model load: "+err)
+            print("Model load succes!")
+            self.model_ready = True
+           
 
     def calculate_span(self, trace_id: str) -> None:
         data = self.repository.get_paths_array(trace_id)[0][0]

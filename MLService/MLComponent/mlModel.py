@@ -3,12 +3,14 @@ from tensorflow.keras.utils import to_categorical
 from tensorflow.keras.models import load_model
 from numpy import array
 from pickle import dump, load
+from pickle import HIGHEST_PROTOCOL
 from keras.preprocessing.text import Tokenizer
 from keras.utils import to_categorical
 from keras.models import Sequential
 from keras.layers import Dense
 from keras.layers import LSTM
 from keras.layers import Embedding
+from keras.layers import Dropout
 import numpy as np
 from numpy import array
 from typing import Tuple
@@ -38,15 +40,15 @@ class MLModel:
     def split_paths(self, paths: list) -> list:
         lines = []
         length = 2 + 1  # 2 Previous calculate next
-        for span in paths:
-            for i in range(length, len(span) + 1):
-                lines.append(span[i - length:i])
+        for i in range(length, len(paths) + 1):
+            lines.append(paths[i - length:i])
         return lines
 
     def learn(self, pathsArray, modelName) -> Exception:
         try:
             tokenizer = Tokenizer(oov_token="<OOV>")
             tokenizer.fit_on_texts(pathsArray)
+            print(tokenizer.word_index)
             vocab_size = len(tokenizer.word_index) + 1
 
             lines = self.split_paths(pathsArray)
@@ -60,8 +62,10 @@ class MLModel:
 
             model = Sequential()
             model.add(Embedding(vocab_size, 32, input_length=seq_length))
+            model.add(Dropout(0.2))
             model.add(LSTM(32, return_sequences=True))
             model.add(LSTM(32))
+            model.add(Dropout(0.2))
             model.add(Dense(16, activation='relu'))
             model.add(Dense(vocab_size, activation='softmax'))
             print(model.summary())
@@ -71,22 +75,22 @@ class MLModel:
                           optimizer='adam', metrics=['accuracy'])
 
             # fit model
-            model.fit(X, y, epochs=32)
+            model.fit(X, y, epochs=50,batch_size=4)
 
             # save the model
             self.model = model
             self.tokenizer = tokenizer
             model.save(self.modelPath + modelName + '_model.h5')
             dump(tokenizer, open(self.modelPath +
-                 modelName + '_tokenizer.pkl', 'wb'))
+                 modelName + '_tokenizer.pkl', 'wb'),HIGHEST_PROTOCOL)
         except Exception as e:
             return e
 
     def predict(self, paths_array) -> Tuple[bool,str,str,str]:
-        paths = [tmp["span_name"] for tmp in paths_array]
-        lines = self.split_paths(paths)
-        sequences = self.tokenizer.texts_to_sequences(lines)
-        sequences = array(sequences)
+        print(self.tokenizer.word_index)
+        paths = [tmp["span_name"].lower() for tmp in paths_array]
+        sequences = self.tokenizer.texts_to_sequences([paths])
+        sequences = self.split_paths(sequences[0])
 
         no_path = 2
         for i in range(len(sequences)):
@@ -106,6 +110,7 @@ class MLModel:
                         break
                 return True, paths_array[no_path]["span_name"], paths_array[no_path]["span_id"], out_word
 
+        return False, "", "",""
 
 if __name__ == "__main__":
     paths = [
