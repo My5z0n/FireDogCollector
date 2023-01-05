@@ -56,7 +56,8 @@ class MainObj:
         signal.signal(signal.SIGINT, self.close_handler)
         print("Init")
         sleep(5)
-        self.start_model_queue.put(("LOAD_MODEL", "main"))
+        
+
         while True:
             sleep(1)
 
