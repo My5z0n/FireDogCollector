@@ -6,7 +6,7 @@ class Repository:
     host: str = ""
     database: str = ""
 
-    def __init__(self, host: str = 'localhost', database: str = 'FireDogTraces'):
+    def __init__(self, host: str = 'clickhouse-db-server', database: str = 'FireDogTraces'):
         self.host = host
         self.database = database
         self.client = clickhouse_connect.get_client(host=self.host,

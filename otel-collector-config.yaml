@@ -1,0 +1,24 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+
+processors:
+  groupbytrace:
+    wait_duration: 6s
+    num_traces: 1000
+exporters:
+  logging:
+    loglevel: debug
+  otlp:
+    endpoint: firedog-collector:2137
+    tls:
+      insecure: true
+    compression: none
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [groupbytrace]
+      exporters: [logging, otlp]

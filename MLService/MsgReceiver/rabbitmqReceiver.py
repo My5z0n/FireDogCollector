@@ -4,7 +4,7 @@ from time import sleep
 from multiprocessing import Queue
 
 class RabbitmqReceiver():
-    con: str = 'localhost'
+    con: str = 'rabbitmq'
     exchange_name: str = 'newSpanToProcessNotification'
     process_queue: Queue = None
     queue_name: str = None

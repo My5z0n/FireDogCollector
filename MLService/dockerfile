@@ -1,18 +1,19 @@
-FROM tensorflow/tensorflow as base
+FROM tensorflow/tensorflow:2.10.1
 
-WORKDIR /APP
+# Set the working directory in the container
+WORKDIR /app
 
-RUN pip install pika clickhouse_connect
+# Copy the requirements file into the container
+COPY requirements.txt .
+
+# Install the dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the rest of the application code into the container
+COPY . .
+
+# Expose the port on which the application runs
 
 
-COPY ./*.py .
-
-
-COPY ./MLComponent ./MLComponent
-
-COPY ./MLFiredogModel ./MLFiredogModel
-
-COPY ./repository ./repository
-
-
-CMD [ "python", "./main.py" ]
+# Command to run the application
+CMD ["python", "main.py"]
