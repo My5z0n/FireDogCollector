@@ -38,6 +38,7 @@ class MainObj:
         exit()
 
     def init(self) -> None:
+        print("Init")
         self.span_notification_queue = Queue()
         self.start_model_queue = Queue()
 
@@ -54,12 +55,10 @@ class MainObj:
         self.ml_process.start()
 
         signal.signal(signal.SIGINT, self.close_handler)
-        print("Init")
-        sleep(5)
+        print("Completed")
+        self.start_model_queue.put(("LOAD_MODEL", "main"))
         
 
-        while True:
-            sleep(1)
 
 
 if __name__ == "__main__":

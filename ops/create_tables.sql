@@ -1,4 +1,7 @@
-CREATE TABLE FireDogTraces.traces
+CREATE DATABASE IF NOT EXISTS FireDogTraces;
+
+
+CREATE TABLE IF NOT EXISTS FireDogTraces.traces
 (
     trace_id String,
     paths String,
@@ -10,20 +13,20 @@ ENGINE = MergeTree()
 PRIMARY KEY (trace_id, paths);
 
 SET allow_experimental_object_type=1;
-CREATE TABLE FireDogTraces.spans
+CREATE TABLE  IF NOT EXISTS FireDogTraces.spans
 (
     trace_id String,
     span_id String,
     parent_span_id String,
     span_name String,
     start_time DATETIME,
-    end_time DATETIME,
-    attributes JSON
+    end_time DATETIME
+--    attributes JSON
 )
 ENGINE = MergeTree()
 PRIMARY KEY (trace_id, span_id);
 
-CREATE TABLE FireDogTraces.predictions
+CREATE TABLE  IF NOT EXISTS FireDogTraces.predictions
 (
     trace_id String,
     anomaly_detected Nullable(Bool),
@@ -32,12 +35,12 @@ CREATE TABLE FireDogTraces.predictions
     expected_span_name String
 )
 ENGINE = MergeTree()
-PRIMARY KEY (trace_id,anomaly_detected);
+PRIMARY KEY (trace_id);
 
 ----------------------------------------------------
-CREATE MATERIALIZED VIEW mqtraceprocess
-ENGINE = RabbitMQ SETTINGS rabbitmq_address = 'amqp://guest:guest@some-rabbit:5672/',
+CREATE MATERIALIZED VIEW  IF NOT EXISTS mqtraceprocess
+ENGINE = RabbitMQ SETTINGS rabbitmq_address = 'amqp://guest:guest@rabbitmq:5672/',
                             rabbitmq_exchange_name = 'newSpanToProcessNotification',
                             rabbitmq_format = 'JSONEachRow',
                             rabbitmq_exchange_type = 'fanout'
-AS SELECT trace_id from traces;
+AS SELECT trace_id from FireDogTraces.traces;

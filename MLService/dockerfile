@@ -1,4 +1,4 @@
-FROM tensorflow/tensorflow:2.10.1
+FROM tensorflow/tensorflow:2.11.0
 
 # Set the working directory in the container
 WORKDIR /app

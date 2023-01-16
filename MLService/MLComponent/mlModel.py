@@ -48,7 +48,6 @@ class MLModel:
         try:
             tokenizer = Tokenizer(oov_token="<OOV>")
             tokenizer.fit_on_texts(pathsArray)
-            print(tokenizer.word_index)
             vocab_size = len(tokenizer.word_index) + 1
 
             lines = self.split_paths(pathsArray)
@@ -87,7 +86,6 @@ class MLModel:
             return e
 
     def predict(self, paths_array) -> Tuple[bool,str,str,str]:
-        print(self.tokenizer.word_index)
         paths = [tmp["span_name"].lower() for tmp in paths_array]
         sequences = self.tokenizer.texts_to_sequences([paths])
         sequences = self.split_paths(sequences[0])
@@ -96,7 +94,6 @@ class MLModel:
         for i in range(len(sequences)):
             no_path += 1
             x = np.asarray([sequences[i][:-1]])
-            print(x)
             ret = self.model.predict(x)
 
             yhat = np.argmax(ret, axis=1)
@@ -113,17 +110,6 @@ class MLModel:
         return False, "", "",""
 
 if __name__ == "__main__":
-    paths = [
-        ['START', 'A', 'B', 'C', 'D', 'END'],
-        ['START', 'A', 'B', 'C', 'F', 'G', 'END'],
-        ['START', 'A', 'B', 'H', 'I', 'END'],
-    ]
-
-    new = []
-    for p in paths:
-        for i in range(100):
-            new.append(p)
-    # print(new)
-    x = MLModel()
-    x.load_model()
-    x.predict([paths[0]])
+    pass
+    #Debug
+    
