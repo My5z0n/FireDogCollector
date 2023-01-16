@@ -2,10 +2,10 @@ package main
 
 import (
 	"github.com/My5z0n/FireDogCollector/OtelCollector/repository"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"log"
 	"net"
-
-	"google.golang.org/grpc"
 	//pb "google.golang.org/grpc/examples/helloworld/helloworld"
 	"github.com/My5z0n/FireDogCollector/OtelCollector/api"
 	coltracepb "go.opentelemetry.io/proto/otlp/collector/trace/v1"
@@ -15,7 +15,7 @@ import (
 )
 
 func main() {
-	lis, err := net.Listen("tcp", "localhost:4320")
+	lis, err := net.Listen("tcp", "0.0.0.0:4320")
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
@@ -26,7 +26,7 @@ func main() {
 		log.Fatalf("Failed to connect to db: %v", err)
 	}
 
-	s := grpc.NewServer()
+	s := grpc.NewServer(grpc.Creds(insecure.NewCredentials()))
 	coltracepb.RegisterTraceServiceServer(s, &api.Server{
 		Abba:            "hello",
 		TraceRepository: r,

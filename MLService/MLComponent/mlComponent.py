@@ -28,8 +28,10 @@ class MLComponent:
             try:
                 ret = self.start_learning_queue.get_nowait()
                 if ret[0] == 'START_TRAIN':
+                    print("START TRAIN")
                     self.learn_model(ret[1])
                 elif ret[0] == 'LOAD_MODEL':
+                    print("LOAD MODEL")
                     self.load_model(ret[1])
 
             except queue.Empty:

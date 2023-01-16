@@ -27,13 +27,15 @@ func NewTraceRepository(port string, database string) (TraceRepository, error) {
 }
 
 func (r *TraceRepository) openConn() error {
+	fmt.Printf("Conecting")
 	conn, err := clickhouse.Open(&clickhouse.Options{
-		Addr: []string{"localhost:9001"},
+		Addr: []string{"clickhouse_db_server:9000"},
 		Auth: clickhouse.Auth{
 			Database: "FireDogTraces",
 		},
 	})
 	if err != nil {
+		fmt.Print(err)
 		return err
 	}
 	r.connection = conn

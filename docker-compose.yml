@@ -1,0 +1,64 @@
+version: '3'
+
+services:
+    firedog-collector:
+        build:
+            dockerfile: ./dockerfile
+            context: ./OTelCollector
+        container_name: firedog-collector
+        depends_on:
+            - clickhouse_db_server
+        ports:
+            - 4320:4320
+        networks:
+            - network-internal
+            - network-external
+    ml-service:
+        build:
+            dockerfile: ./dockerfile
+            context: ./MLService
+        depends_on:
+            - clickhouse_db_server
+            - rabbitmq
+        container_name: ml-service
+        ports:
+            - 9181:9181
+        networks:
+            - network-internal        
+    rabbitmq:
+        image: rabbitmq:3-management
+        container_name: rabbitmq
+        ports:
+            - 5672:5672
+            - 15672:15672
+        volumes:
+            - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
+            - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
+        networks:
+            - network-internal
+    clickhouse_db_server:
+        image: clickhouse/clickhouse-server
+        container_name: clickhouse_db_server
+        depends_on:
+            - rabbitmq
+        volumes:
+            - ./ops/create_tables.sql:/docker-entrypoint-initdb.d/create_tables.sql
+        # Don't work with Windows Docker Desktop
+        #  - ./.clickhouse-db:/var/lib/clickhouse:Z
+        ulimits:
+            nproc: 65535
+            nofile:
+                soft: 262144
+                hard: 262144
+        ports:
+            - "8123:8123"
+            - "9000:9000"
+        networks:
+            - network-internal
+networks:
+    network-external:
+        driver: bridge
+        name: otel_network
+    network-internal:
+
+

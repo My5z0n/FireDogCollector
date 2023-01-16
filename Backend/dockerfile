@@ -6,13 +6,11 @@ COPY . .
 
 RUN go mod download
 
-
-
 COPY *.go ./
 RUN go build -o ./build/rungo .
 
 
-#Step 2 
+## Step 2
 FROM golang:1.19.1-alpine
 
 WORKDIR /BUILD
@@ -20,3 +18,5 @@ WORKDIR /BUILD
 COPY --from=base ./APP/build .
 
 CMD [ "./rungo" ]
+
+

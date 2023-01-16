@@ -1,7 +1,7 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import urlparse
 from multiprocessing import Queue
-hostName = "localhost"
+hostName = "0.0.0.0"
 serverPort = 9181
 
 
@@ -23,6 +23,7 @@ class MainServer(BaseHTTPRequestHandler):
             modelNameParam = queryParams["modelName"]
 
         # Route
+        # Sample: localhost.9181/START_TRAIN?modelName=MyName
         if path == '/START_TRAIN':
             self.process_queue.put(("START_TRAIN", modelNameParam))
 
@@ -32,6 +33,7 @@ class MainServer(BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header("Content-type", "text/html")
         self.end_headers()
+        self.wfile.write(bytes(path,encoding="utf-8"))
 
 
 class APIService:
