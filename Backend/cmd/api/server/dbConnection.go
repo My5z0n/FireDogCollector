@@ -12,7 +12,7 @@ type dbConnectionSettings struct {
 
 func CreateDBConnection() driver.Conn {
 	conn, err := clickhouse.Open(&clickhouse.Options{
-		Addr: []string{"localhost:9001"},
+		Addr: []string{"localhost:9000"},
 		Auth: clickhouse.Auth{
 			Database: "FireDogTraces",
 		},

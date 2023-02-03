@@ -40,9 +40,9 @@ func (s *Span) SetAttribute(name string, value any) {
 	case "span_name":
 		s.SpanName = *(value).(*string)
 	case "start_time":
-		s.StartTime = **(value).(**time.Time)
+		s.StartTime = *(value).(*time.Time)
 	case "end_time":
-		s.EndTime = **(value).(**time.Time)
+		s.EndTime = *(value).(*time.Time)
 	default:
 		switch v := value.(type) {
 		case **string:
