@@ -8,28 +8,26 @@ import (
 	"github.com/ClickHouse/clickhouse-go/v2/lib/driver"
 	"github.com/My5z0n/FireDogCollector/OtelCollector/models"
 	"github.com/My5z0n/FireDogCollector/OtelCollector/utils"
+	spanProcess "github.com/My5z0n/FireDogCollector/OtelCollector/utils/spanPathsProcessing"
 	"regexp"
 	"time"
 )
 
 type TraceRepository struct {
-	port       string
-	database   string
 	connection clickhouse.Conn
 }
 
-func NewTraceRepository(port string, database string) (TraceRepository, error) {
-	t := TraceRepository{
-		port:     port,
-		database: database,
-	}
-	return t, t.openConn()
+func NewTraceRepository(config utils.Config) (TraceRepository, error) {
+	t := TraceRepository{}
+
+	return t, t.openConn(config)
 }
 
-func (r *TraceRepository) openConn() error {
-	fmt.Printf("Conecting")
+func (r *TraceRepository) openConn(c utils.Config) error {
+
+	conAdr := c.DbUrl + ":" + c.DbPort
 	conn, err := clickhouse.Open(&clickhouse.Options{
-		Addr: []string{"clickhouse_db_server:9000"},
+		Addr: []string{conAdr},
 		Auth: clickhouse.Auth{
 			Database: "FireDogTraces",
 		},
@@ -112,9 +110,8 @@ func (r *TraceRepository) SaveSpan(model models.ClickHouseSpan) error {
 
 func (r *TraceRepository) SaveTrace(paths [][]map[string]string, traceId string, startTime time.Time, jsonSpans string) error {
 
-	flatSpan := flattenSpansList(paths)[0]
+	flatSpan := spanProcess.FlattenSpansList(paths)[0]
 	//TODO: Handle many paths
-	fmt.Println(flatSpan)
 
 	batch, err := r.connection.PrepareBatch(context.Background(), "INSERT INTO traces ")
 	if err != nil {
@@ -139,19 +136,4 @@ func (r *TraceRepository) SaveTrace(paths [][]map[string]string, traceId string,
 	}
 
 	return batch.Send()
-}
-
-func flattenSpansList(paths [][]map[string]string) []string {
-
-	flattenPaths := make([]string, 0)
-
-	for _, v := range paths {
-		str := v[0]["span_name"]
-		for i := 1; i < len(v); i++ {
-			str = fmt.Sprintf("%s#%s", str, v[i]["span_name"])
-		}
-		flattenPaths = append(flattenPaths, str)
-	}
-
-	return flattenPaths
 }

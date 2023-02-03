@@ -1,8 +1,11 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import urlparse
 from multiprocessing import Queue
-hostName = "0.0.0.0"
-serverPort = 9181
+import os
+
+
+hostName = os.getenv("API_HOSTNAME")
+serverPort = int(os.getenv("API_PORT"))
 
 
 class MainServer(BaseHTTPRequestHandler):

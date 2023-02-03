@@ -1,6 +1,7 @@
 package spanPathsProcessing
 
 import (
+	"fmt"
 	"github.com/My5z0n/FireDogCollector/OtelCollector/models"
 	"time"
 )
@@ -13,13 +14,11 @@ type SpanElementJSON struct {
 	Child     []SpanElementJSON
 }
 
-//func Unroll(spanMap map[string]*models.Span, root string) [][]map[string]string
-
-func GeneratePathsFromSpans(graph map[string]*models.Span, spanChilds []string) [][]map[string]string {
+func GeneratePathsFromSpans(graph map[string]*models.Span, spanChild []string) [][]map[string]string {
 
 	list := [][]map[string]string{}
 
-	for _, v := range spanChilds {
+	for _, v := range spanChild {
 		ret := searchUP(graph, v)
 		reverse(ret)
 		ret = append(ret, map[string]string{
@@ -40,7 +39,6 @@ func reverse(s []map[string]string) {
 
 func searchUP(graph map[string]*models.Span, id string) []map[string]string {
 
-	//v, _ := graph[id]
 	if v, ok := graph[id]; ok {
 		ret := searchUP(graph, v.SpanProperties.Parent_Span_id)
 		return append([]map[string]string{{
@@ -55,4 +53,19 @@ func searchUP(graph map[string]*models.Span, id string) []map[string]string {
 		}}
 	}
 
+}
+
+func FlattenSpansList(paths [][]map[string]string) []string {
+
+	flattenPaths := make([]string, 0)
+
+	for _, v := range paths {
+		str := v[0]["span_name"]
+		for i := 1; i < len(v); i++ {
+			str = fmt.Sprintf("%s#%s", str, v[i]["span_name"])
+		}
+		flattenPaths = append(flattenPaths, str)
+	}
+
+	return flattenPaths
 }

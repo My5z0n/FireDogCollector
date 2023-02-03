@@ -1,14 +1,14 @@
 import clickhouse_connect
-
+import os
 
 class Repository:
     client = None
     host: str = ""
     database: str = ""
 
-    def __init__(self, host: str = 'clickhouse_db_server', database: str = 'FireDogTraces'):
-        self.host = host
-        self.database = database
+    def __init__(self):
+        self.host = os.getenv("DB_SERVER_URL")
+        self.database = 'FireDogTraces'
         self.client = clickhouse_connect.get_client(host=self.host,
                                                     database=self.database,
                                                     query_limit=0)

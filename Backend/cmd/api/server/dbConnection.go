@@ -3,16 +3,15 @@ package server
 import (
 	"github.com/ClickHouse/clickhouse-go/v2"
 	"github.com/ClickHouse/clickhouse-go/v2/lib/driver"
+	"github.com/My5z0n/FireDogCollector/Backend/Settings"
 	"log"
 )
 
-type dbConnectionSettings struct {
-	Name string
-}
+func CreateDBConnection(c Settings.Config) driver.Conn {
 
-func CreateDBConnection() driver.Conn {
+	addrCon := c.DbUrl + ":" + c.DbPort
 	conn, err := clickhouse.Open(&clickhouse.Options{
-		Addr: []string{"localhost:9000"},
+		Addr: []string{addrCon},
 		Auth: clickhouse.Auth{
 			Database: "FireDogTraces",
 		},

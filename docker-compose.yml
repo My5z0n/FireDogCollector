@@ -13,6 +13,8 @@ services:
         networks:
             - network-internal
             - network-external
+        env_file:
+            - ./ops/otel-collector.env
     firedog-frontend:
         build:
             dockerfile: ./dockerfile
@@ -35,6 +37,8 @@ services:
             - 9900:9900
         networks:
             - network-internal
+        env_file:
+            - ./ops/firedog-backend.env
     ml-service:
         build:
             dockerfile: ./dockerfile
@@ -46,7 +50,9 @@ services:
         ports:
             - 9181:9181
         networks:
-            - network-internal        
+            - network-internal      
+        env_file:
+            - ./ops/ml-service.env  
     rabbitmq:
         image: rabbitmq:3-management
         container_name: rabbitmq
