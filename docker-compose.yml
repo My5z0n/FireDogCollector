@@ -13,6 +13,28 @@ services:
         networks:
             - network-internal
             - network-external
+    firedog-frontend:
+        build:
+            dockerfile: ./dockerfile
+            context: ./Frontend/Svelte-App
+        container_name: firedog-frontend
+        depends_on:
+            - firedog-backend
+        ports:
+            - 8033:3000
+        networks:
+            - network-internal
+    firedog-backend:
+        build:
+            dockerfile: ./dockerfile
+            context: ./Backend
+        container_name: firedog-backend
+        depends_on:
+            - clickhouse_db_server
+        ports:
+            - 9900:9900
+        networks:
+            - network-internal
     ml-service:
         build:
             dockerfile: ./dockerfile
@@ -60,5 +82,3 @@ networks:
         driver: bridge
         name: otel_network
     network-internal:
-
-
