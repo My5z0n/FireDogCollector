@@ -9,36 +9,30 @@ from threading import Thread
 
 def work_ml_component(span_queue: Queue, model_queue: Queue) ->None:
     stop_event = Event()
-    signal.signal(signal.SIGINT, lambda a, b: stop_event.set())
     MLComponent(span_queue, model_queue, stop_event).process_messages()
 
 
 def work_API(model_queue: Queue) -> None:
     api = APIService(model_queue)
-    signal.signal(signal.SIGINT, lambda a,b: Thread(
-        target=lambda: api.server.shutdown()).start())
     api.Run()
 
 
 def work_rabbit(span_queue: Queue) -> None:
     rabbit = RabbitmqReceiver(span_queue)
-    signal.signal(signal.SIGINT, lambda a,b:
-                  Thread(target=lambda: rabbit.channel.stop_consuming()).start())
     rabbit.lisen()
 
 
 class MainObj:
 
-    def close_handler(self, a, b) -> None:
+    def close_handler(self, a, b,c=0) -> None:
         print("Closing")
-        self.ml_process.join()
-        self.api_process.join()
-        self.rabbit_process.join()
+        self.ml_process.terminate()
+        self.api_process.terminate()
+        self.rabbit_process.terminate()
         print("Exiting")
-        exit()
+        exit(c)
 
     def init(self) -> None:
-        print("Init")
         self.span_notification_queue = Queue()
         self.start_model_queue = Queue()
 
@@ -55,8 +49,21 @@ class MainObj:
         self.ml_process.start()
 
         signal.signal(signal.SIGINT, self.close_handler)
-        print("Completed")
+        
+        #Debug
         self.start_model_queue.put(("LOAD_MODEL", "main"))
+        
+        while True:
+            if not self.rabbit_process.is_alive():
+                print("Rabbit died")
+                self.close_handler(None, None,-1)
+            if not self.api_process.is_alive():
+                print("API died")
+                self.close_handler(None, None,-1)
+            if not self.ml_process.is_alive():
+                print("ML died")
+                self.close_handler(None, None,-1)
+            sleep(5)
         
 
 

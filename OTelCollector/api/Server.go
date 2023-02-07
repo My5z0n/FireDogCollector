@@ -20,7 +20,6 @@ import (
 
 type Server struct {
 	coltracepb.UnimplementedTraceServiceServer
-	Abba            string
 	TraceRepository repository.TraceRepository
 }
 
@@ -52,9 +51,6 @@ func (s *Server) processSpan(resource *v1.ResourceSpans, scope *v1.ScopeSpans, s
 		}
 
 	}
-
-	//obj, errr := json.Marshal(attributesMap)
-	//fmt.Println("Marshal Datasets Result : ", string(obj), errr)
 
 	model := models.ClickHouseSpan{
 		Trace_id:         hex.EncodeToString(span.TraceId),

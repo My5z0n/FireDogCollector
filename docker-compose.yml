@@ -13,6 +13,32 @@ services:
         networks:
             - network-internal
             - network-external
+        env_file:
+            - ./ops/otel-collector.env
+    firedog-frontend:
+        build:
+            dockerfile: ./dockerfile
+            context: ./Frontend/Svelte-App
+        container_name: firedog-frontend
+        depends_on:
+            - firedog-backend
+        ports:
+            - 8033:3000
+        networks:
+            - network-internal
+    firedog-backend:
+        build:
+            dockerfile: ./dockerfile
+            context: ./Backend
+        container_name: firedog-backend
+        depends_on:
+            - clickhouse_db_server
+        ports:
+            - 9900:9900
+        networks:
+            - network-internal
+        env_file:
+            - ./ops/firedog-backend.env
     ml-service:
         build:
             dockerfile: ./dockerfile
@@ -24,7 +50,9 @@ services:
         ports:
             - 9181:9181
         networks:
-            - network-internal        
+            - network-internal      
+        env_file:
+            - ./ops/ml-service.env  
     rabbitmq:
         image: rabbitmq:3-management
         container_name: rabbitmq
@@ -60,5 +88,3 @@ networks:
         driver: bridge
         name: otel_network
     network-internal:
-
-
