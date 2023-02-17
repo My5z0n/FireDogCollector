@@ -53,6 +53,8 @@ class MLComponent:
 
         ret_data = [[a['span_name'] for a in v[0]] for v in data]
 
+        ret_data = [v for v in data if len(v)>2]
+        
         err = self.model.learn(ret_data, modelName)
         if err != None:
             print(f"Error during model learning: {err}")
@@ -72,5 +74,8 @@ class MLComponent:
 
     def calculate_span(self, trace_id: str) -> None:
         data = self.repository.get_paths_array(trace_id)[0][0]
-        result = self.model.predict(data)
-        self.repository.set_prediction(trace_id, *result)
+        try:
+            result = self.model.predict(data)
+            self.repository.set_prediction(trace_id, *result)
+        except Exception as e:
+             print(f"Error during span calculation: {e}")

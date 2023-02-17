@@ -135,8 +135,6 @@ func (s *Server) saveTrace(inputProcessedSpansChan <-chan models.ClickHouseSpan,
 
 func (s *Server) Export(ctx context.Context, request *coltracepb.ExportTraceServiceRequest) (*coltracepb.ExportTraceServiceResponse, error) {
 
-	sp := request.ResourceSpans
-
 	g := new(errgroup.Group)
 
 	//Maximum 1000 of elements
@@ -144,7 +142,7 @@ func (s *Server) Export(ctx context.Context, request *coltracepb.ExportTraceServ
 
 	var waitCount int32
 
-	for _, resSpan := range sp {
+	for _, resSpan := range request.ResourceSpans {
 		for _, scopeSpan := range resSpan.GetScopeSpans() {
 			for _, span := range scopeSpan.GetSpans() {
 				name := span.Name
@@ -153,9 +151,6 @@ func (s *Server) Export(ctx context.Context, request *coltracepb.ExportTraceServ
 				atomic.AddInt32(&waitCount, 1)
 				g.Go(func() error {
 					err := s.processSpan(resSpan, scopeSpan, span, processSpanChan)
-					//if err != nil {
-					//	atomic.AddInt32(&waitCount, -1)
-					//}
 					return err
 
 				})

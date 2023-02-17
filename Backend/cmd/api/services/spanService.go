@@ -25,6 +25,26 @@ func (s SpanService) GetSpansListFromTraceID(id string) ([]dto.SpanListElementDT
 	if err != nil {
 		return nil, err
 	}
+
+	isParent := make(map[string]int)
+
+	for _, span := range spans {
+		if span.ParentSpanID != "" {
+			isParent[span.ParentSpanID] = 1
+		}
+	}
+	for _, span := range spans {
+		if _, ok := isParent[span.SpanID]; !ok {
+			spans = append(spans, dto.SpanListElementDTO{
+				TraceID:      span.TraceID,
+				SpanName:     "!END",
+				ParentSpanID: span.SpanID,
+				StartTime:    span.EndTime,
+				EndTime:      span.EndTime,
+			})
+		}
+	}
+
 	prediction, err := s.Models.PredictionsRepository.GetAnomalyFromTraceID(id)
 	if err != nil {
 		//Not Found

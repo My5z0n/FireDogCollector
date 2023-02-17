@@ -24,7 +24,6 @@ func (m TraceRepository) GetTracesWithAnomalies(offset int, limit int) (result [
 	if err != nil {
 		fmt.Println(err)
 	}
-	println(len(result))
 	return
 }
 

@@ -87,10 +87,14 @@ class MLModel:
 
     def predict(self, paths_array) -> Tuple[bool,str,str,str]:
         paths = [tmp["span_name"].lower() for tmp in paths_array]
+        print(paths_array)
+        print(paths)
+        if len(paths) < 3:
+           raise Exception("Not enough data to predict")
         sequences = self.tokenizer.texts_to_sequences([paths])
         sequences = self.split_paths(sequences[0])
 
-        no_path = 2
+        no_path = 1
         for i in range(len(sequences)):
             no_path += 1
             x = np.asarray([sequences[i][:-1]])
@@ -105,6 +109,7 @@ class MLModel:
                     if index == yhat:
                         out_word = word
                         break
+                print("Out Word: " + out_word)
                 return True, paths_array[no_path]["span_name"], paths_array[no_path]["span_id"], out_word
 
         return False, "", "",""
