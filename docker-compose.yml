@@ -49,10 +49,13 @@ services:
         container_name: ml-service
         ports:
             - 9181:9181
+            - 5678:5678
         networks:
             - network-internal      
         env_file:
             - ./ops/ml-service.env  
+        volumes:
+            - ./MLService/MLFiredogModel:/app/MLFiredogModel
     rabbitmq:
         image: rabbitmq:3-management
         container_name: rabbitmq
@@ -71,6 +74,9 @@ services:
             - rabbitmq
         volumes:
             - ./ops/create_tables.sql:/docker-entrypoint-initdb.d/create_tables.sql
+            - ./ops/custom_config.xml:/etc/clickhouse-server/config.d/custom_config.xml
+            - ./ops/custom_users.xml:/etc/clickhouse-server/users.d/custom_users.xml
+            - ./ops/my_log.log:/var/log/clickhouse-server/clickhouse-server.err.log
         # Don't work with Windows Docker Desktop
         #  - ./.clickhouse-db:/var/lib/clickhouse:Z
         ulimits:
@@ -81,6 +87,7 @@ services:
         ports:
             - "8123:8123"
             - "9000:9000"
+            - "9005:9005"
         networks:
             - network-internal
 networks:

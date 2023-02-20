@@ -5,7 +5,7 @@ from API.APIService import APIService
 from MsgReceiver.rabbitmqReceiver import RabbitmqReceiver
 from time import sleep
 from threading import Thread
-
+import debugpy
 
 def work_ml_component(span_queue: Queue, model_queue: Queue) ->None:
     stop_event = Event()
@@ -51,7 +51,8 @@ class MainObj:
         signal.signal(signal.SIGINT, self.close_handler)
         
         #Debug
-        self.start_model_queue.put(("LOAD_MODEL", "main"))
+        print("Starting main model")
+        self.start_model_queue.put(("LOAD_MODEL", "main_model"))
         
         while True:
             if not self.rabbit_process.is_alive():
@@ -69,5 +70,8 @@ class MainObj:
 
 
 if __name__ == "__main__":
+    debugpy.listen(("0.0.0.0", 5678))
+    #print("Waiting for client to attach...")
+   # debugpy.wait_for_client()
     main = MainObj()
     main.init()

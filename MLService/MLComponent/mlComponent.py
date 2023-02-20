@@ -28,10 +28,10 @@ class MLComponent:
             try:
                 ret = self.start_learning_queue.get_nowait()
                 if ret[0] == 'START_TRAIN':
-                    print("START TRAIN")
+                    print("START TRAIN",flush=True)
                     self.learn_model(ret[1])
                 elif ret[0] == 'LOAD_MODEL':
-                    print("LOAD MODEL")
+                    print("LOAD MODEL",flush=True)
                     self.load_model(ret[1])
 
             except queue.Empty:
@@ -53,7 +53,9 @@ class MLComponent:
 
         ret_data = [[a['span_name'] for a in v[0]] for v in data]
 
-        err = self.model.learn(ret_data, modelName)
+        ret_data_fin = [v for v in ret_data if len(v)>2]
+        
+        err = self.model.learn(ret_data_fin, modelName)
         if err != None:
             print(f"Error during model learning: {err}")
         else:
@@ -72,5 +74,8 @@ class MLComponent:
 
     def calculate_span(self, trace_id: str) -> None:
         data = self.repository.get_paths_array(trace_id)[0][0]
-        result = self.model.predict(data)
-        self.repository.set_prediction(trace_id, *result)
+        try:
+            result = self.model.predict(data)
+            self.repository.set_prediction(trace_id, *result)
+        except Exception as e:
+             print(f"Error during span calculation: {e}")

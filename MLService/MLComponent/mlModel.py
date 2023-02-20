@@ -15,7 +15,7 @@ import numpy as np
 from numpy import array
 from typing import Tuple
 
-PREDICT_CONST = 0.25
+PREDICT_CONST = 0.5
 
 
 class MLModel:
@@ -39,9 +39,10 @@ class MLModel:
 
     def split_paths(self, paths: list) -> list:
         lines = []
-        length = 2 + 1  # 2 Previous calculate next
-        for i in range(length, len(paths) + 1):
-            lines.append(paths[i - length:i])
+        for path in paths:
+            length = 2 + 1  # 2 Previous calculate next
+            for i in range(length, len(path) + 1):
+                lines.append(path[i - length:i])
         return lines
 
     def learn(self, pathsArray, modelName) -> Exception:
@@ -87,10 +88,13 @@ class MLModel:
 
     def predict(self, paths_array) -> Tuple[bool,str,str,str]:
         paths = [tmp["span_name"].lower() for tmp in paths_array]
+        print(paths)
+        if len(paths) < 3:
+           raise Exception("Not enough data to predict")
         sequences = self.tokenizer.texts_to_sequences([paths])
-        sequences = self.split_paths(sequences[0])
+        sequences = self.split_paths(sequences)
 
-        no_path = 2
+        no_path = 1
         for i in range(len(sequences)):
             no_path += 1
             x = np.asarray([sequences[i][:-1]])
@@ -99,12 +103,16 @@ class MLModel:
             yhat = np.argmax(ret, axis=1)
 
             out = sequences[i][-1]
+
+            print("Ret:")
+            print(ret[0][out])
             if ret[0][out] < PREDICT_CONST:
                 out_word = "ERR"
                 for word, index in self.tokenizer.word_index.items():
                     if index == yhat:
                         out_word = word
                         break
+                print("Out Word: " + out_word)
                 return True, paths_array[no_path]["span_name"], paths_array[no_path]["span_id"], out_word
 
         return False, "", "",""

@@ -57,9 +57,11 @@
 
 	{#if DetectedAnomalyInTrace}
 		<hr />
+		{#if Anomaly_SpanID!=""}
 		<h5 class="text-danger">
 			Detected anomaly in this Trace. Span ID: [{Anomaly_SpanID}]
 		</h5>
+		{/if}
 		<h5 class="text-danger">Received: {ReceivedAnomalySpanName}</h5>
 		<h5 class="text-danger">Expected: {ExpectedAnomalySpanName}</h5>
 		<hr />

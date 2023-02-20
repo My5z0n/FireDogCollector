@@ -56,8 +56,13 @@
 <tbody>
 	{#each SpanList as {trace_id,span_id,parent_span_id,span_name,start_time,end_time,AnomalyDetected,ExpectedAnomalySpanName}}
 	<tr class="{AnomalyDetected === true ? 'table-danger' : ''}">
+	{#if span_id != ""}
 	<td><button on:click={() =>{setSpanAttr(span_id)}} class="btn btn-info btn-sm" data-bs-toggle="modal"
 		data-bs-target="#myModal" >Browse</button></td>
+	{:else}
+	<td></td>
+	{/if}
+
 	<td>{span_id}</td>
 
 
@@ -66,7 +71,12 @@
 	{:else}
 	<td><span class="badge bg-dark">Root</span></td>
 	{/if}
+
+	{#if span_name != "!END"}
 	<td>{span_name}</td>
+	{:else}
+	<td><span class="badge bg-dark">End</span></td>
+	{/if}
 	<td>{start_time}</td>
 	<td>{end_time}</td>
 

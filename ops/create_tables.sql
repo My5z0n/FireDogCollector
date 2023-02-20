@@ -21,7 +21,6 @@ CREATE TABLE  IF NOT EXISTS FireDogTraces.spans
     span_name String,
     start_time DATETIME,
     end_time DATETIME
---    attributes JSON
 )
 ENGINE = MergeTree()
 PRIMARY KEY (trace_id, span_id);
