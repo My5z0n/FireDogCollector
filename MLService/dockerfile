@@ -14,6 +14,6 @@ COPY . .
 
 # Expose the port on which the application runs
 
-
+ENV PYTHONUNBUFFERED=1
 # Command to run the application
-CMD ["python", "main.py"]
+CMD ["python3","-u", "main.py"]

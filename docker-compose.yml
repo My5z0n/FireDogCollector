@@ -49,10 +49,13 @@ services:
         container_name: ml-service
         ports:
             - 9181:9181
+            - 5678:5678
         networks:
             - network-internal      
         env_file:
             - ./ops/ml-service.env  
+        volumes:
+            - ./MLService/MLFiredogModel:/app/MLFiredogModel
     rabbitmq:
         image: rabbitmq:3-management
         container_name: rabbitmq
