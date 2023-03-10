@@ -44,17 +44,3 @@ func (m TraceRepository) GetSingleTrace(traceID string) (*models.Trace, error) {
 	return &result, nil
 
 }
-
-/*func (m TraceRepository) GetTracePath(traceID string) (string, error) {
-	query := `select paths from traces WHERE trace_id = ?;`
-
-	var result models.Trace
-
-	row := m.DB.QueryRow(context.Background(), query, traceID)
-	if err := row.ScanStruct(&result); err != nil {
-		return "", err
-	}
-
-	return result.Paths, nil
-}
-*/

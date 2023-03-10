@@ -9,7 +9,6 @@ type SpanListElementDTO struct {
 	SpanName                string    `json:"span_name"`
 	StartTime               time.Time `json:"start_time"`
 	EndTime                 time.Time `json:"end_time"`
-	AnomalyDetected         bool      `json:"AnomalyDetected"`
-	ExpectedAnomalySpanName string    `json:"ExpectedAnomalySpanName"`
-	AnomalyPositionInTrace  int       `json:"AnomalyPositionInTrace"`
+	AnomalyDetected         bool
+	ExpectedAnomalySpanName string
 }

@@ -2,9 +2,7 @@ package controllers
 
 import (
 	"github.com/My5z0n/FireDogCollector/Backend/cmd/api/services"
-	"github.com/My5z0n/FireDogCollector/Backend/cmd/data/dto"
 	"github.com/gin-gonic/gin"
-	"github.com/rs/zerolog/log"
 	"net/http"
 )
 
@@ -34,22 +32,4 @@ func (c AnomalyDetectorController) InitLearningModel(ctx *gin.Context) {
 func (c AnomalyDetectorController) StartRestartModelLearning(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, "OK")
-}
-func (c AnomalyDetectorController) HuntOutlines(ctx *gin.Context) {
-
-	binding := dto.SpanListElementDTO{}
-
-	err := ctx.BindJSON(&binding)
-	if err != nil {
-		//TODO: PROPERLY HANDLE ERRORS
-		log.Error().Msg("BAD INPUT")
-		return
-	}
-
-	request, err := c.Services.AnomalyService.MakeOutlinesRequest(binding)
-	if err != nil {
-		//TODO: PROPERLY HANDLE ERRORS
-		return
-	}
-	ctx.JSON(http.StatusOK, request)
 }

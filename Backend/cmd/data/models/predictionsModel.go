@@ -6,12 +6,11 @@ import (
 )
 
 type Predictions struct {
-	TraceID                string       `ch:"trace_id"`
-	AnomalyDetected        sql.NullBool `ch:"anomaly_detected"`
-	SpanName               string       `ch:"span_name"`
-	SpanID                 string       `ch:"span_id"`
-	ExpectedSpanName       string       `ch:"expected_span_name"`
-	AnomalyPositionInTrace int          `ch:"span_position"`
+	TraceID          string       `ch:"trace_id"`
+	AnomalyDetected  sql.NullBool `ch:"anomaly_detected"`
+	SpanName         string       `ch:"span_name"`
+	SpanID           string       `ch:"span_id"`
+	ExpectedSpanName string       `ch:"expected_span_name"`
 }
 
 func (p Predictions) FitToSpans(spanList []dto.SpanListElementDTO) {
@@ -24,7 +23,6 @@ func (p Predictions) FitToSpans(spanList []dto.SpanListElementDTO) {
 		if spanList[i].SpanID == p.SpanID {
 			spanList[i].AnomalyDetected = p.AnomalyDetected.Bool
 			spanList[i].ExpectedAnomalySpanName = p.ExpectedSpanName
-			spanList[i].AnomalyPositionInTrace = p.AnomalyPositionInTrace
 			break
 		}
 	}
