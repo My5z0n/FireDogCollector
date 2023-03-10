@@ -7,7 +7,11 @@ class Repository:
     database: str = ""
 
     def __init__(self):
-        self.host = os.getenv("DB_SERVER_URL")
+        db_host = os.getenv("DB_SERVER_URL")
+        if db_host is None:
+            self.host = "localhost"
+        else:
+            self.host = db_host        
         self.database = 'FireDogTraces'
         self.client = clickhouse_connect.get_client(host=self.host,
                                                     database=self.database,

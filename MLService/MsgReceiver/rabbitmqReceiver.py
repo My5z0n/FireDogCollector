@@ -2,12 +2,15 @@ import pika
 import json
 from time import sleep
 from multiprocessing import Queue
+import os
 
 class RabbitmqReceiver():
-    con: str = 'rabbitmq'
+    con = os.getenv("RABBIMQ_URL")
+    if con is None:
+        con = "localhost"
     exchange_name: str = 'newSpanToProcessNotification'
-    process_queue: Queue = None
-    queue_name: str = None
+    process_queue: Queue
+    queue_name: str
 
     def __init__(self, procesQueue):
         self.process_queue = procesQueue

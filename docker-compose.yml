@@ -68,7 +68,7 @@ services:
         networks:
             - network-internal
     clickhouse_db_server:
-        image: clickhouse/clickhouse-server
+        image: clickhouse/clickhouse-server:23.2.3-alpine
         container_name: clickhouse_db_server
         depends_on:
             - rabbitmq

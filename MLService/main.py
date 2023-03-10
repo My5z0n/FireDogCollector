@@ -51,8 +51,8 @@ class MainObj:
         signal.signal(signal.SIGINT, self.close_handler)
         
         #Debug
-        print("Starting main model")
-        self.start_model_queue.put(("LOAD_MODEL", "main_model"))
+        #print("Starting main model")
+        #self.start_model_queue.put(("LOAD_MODEL", "main_model"))
         
         while True:
             if not self.rabbit_process.is_alive():

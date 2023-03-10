@@ -42,8 +42,6 @@ class MLComponent:
                 if self.model_ready is True:
                     print("CALCULATE SPAN")
                     self.calculate_span(ret)
-                else:
-                    pass
             except queue.Empty:
                 time.sleep(0.5)
         exit()
