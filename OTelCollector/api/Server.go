@@ -149,8 +149,9 @@ func (s *Server) Export(ctx context.Context, request *coltracepb.ExportTraceServ
 				fmt.Printf("Start processing [Name]: %s \n", name)
 
 				atomic.AddInt32(&waitCount, 1)
+				mySpan := *span
 				g.Go(func() error {
-					err := s.processSpan(resSpan, scopeSpan, span, processSpanChan)
+					err := s.processSpan(resSpan, scopeSpan, &mySpan, processSpanChan)
 					return err
 
 				})
