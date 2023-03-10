@@ -24,5 +24,6 @@ func (s Sever) AttachControllers() {
 
 	anomalyRoute := s.RouterGroup.Group("/anomalydetetor")
 	anomalyRoute.GET("/starttrain", s.Controllers.AnomalyDetectorControllers.InitLearningModel)
+	anomalyRoute.GET("/find-outlines", s.Controllers.AnomalyDetectorControllers.HuntOutlines)
 
 }
