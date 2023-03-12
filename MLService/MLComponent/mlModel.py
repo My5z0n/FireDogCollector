@@ -20,8 +20,8 @@ PREDICT_CONST = 0.5
 
 class MLModel:
     modelPath: str = ""
-    tokenizer: Tokenizer = None
-    model: Sequential = None
+    tokenizer: Tokenizer
+    model: Sequential
 
     def __init__(self, modelPath: str = './MLFiredogModel/', ):
         self.modelPath = modelPath
@@ -47,7 +47,7 @@ class MLModel:
 
     def learn(self, pathsArray, modelName) -> Exception:
         try:
-            tokenizer = Tokenizer(oov_token="<OOV>")
+            tokenizer = Tokenizer(oov_token="<OOV>", lower=False)
             tokenizer.fit_on_texts(pathsArray)
             vocab_size = len(tokenizer.word_index) + 1
 
@@ -56,8 +56,8 @@ class MLModel:
             sequences = tokenizer.texts_to_sequences(lines)
             sequences = array(sequences)
 
-            X, y = sequences[:, :-1], sequences[:, -1]
-            y = to_categorical(y, num_classes=vocab_size)
+            X, Y = sequences[:, :-1], sequences[:, -1]
+            y = to_categorical(Y, num_classes=vocab_size)
             seq_length = X.shape[1]
 
             model = Sequential()
@@ -75,22 +75,22 @@ class MLModel:
                           optimizer='adam', metrics=['accuracy'])
 
             # fit model
-            model.fit(X, y, epochs=50,batch_size=4)
+            model.fit(X, y, epochs=50, batch_size=4)
 
             # save the model
             self.model = model
             self.tokenizer = tokenizer
             model.save(self.modelPath + modelName + '_model.h5')
             dump(tokenizer, open(self.modelPath +
-                 modelName + '_tokenizer.pkl', 'wb'),HIGHEST_PROTOCOL)
+                 modelName + '_tokenizer.pkl', 'wb'), HIGHEST_PROTOCOL)
         except Exception as e:
             return e
 
-    def predict(self, paths_array) -> Tuple[bool,str,str,str]:
-        paths = [tmp["span_name"].lower() for tmp in paths_array]
+    def predict(self, paths_array) -> Tuple[bool, str, str, str]:
+        paths = [tmp["span_name"] for tmp in paths_array]
         print(paths)
         if len(paths) < 3:
-           raise Exception("Not enough data to predict")
+            raise Exception("Not enough data to predict")
         sequences = self.tokenizer.texts_to_sequences([paths])
         sequences = self.split_paths(sequences)
 
@@ -115,9 +115,9 @@ class MLModel:
                 print("Out Word: " + out_word)
                 return True, paths_array[no_path]["span_name"], paths_array[no_path]["span_id"], out_word
 
-        return False, "", "",""
+        return False, "", "", ""
+
 
 if __name__ == "__main__":
     pass
-    #Debug
-    
+    # Debug

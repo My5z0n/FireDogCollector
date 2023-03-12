@@ -10,6 +10,7 @@
 	setTable();
 	
 	export let anomaly = false;
+	export let AnomalyElementObj;
 	export let anomaly_SpanID = "";
 	export let expected = "";
 	export let got = "";
@@ -31,6 +32,7 @@
 					x.start_time = new Date(x.start_time).toISOString();
 					x.end_time = new Date(x.end_time).toISOString();
 					if (x.AnomalyDetected == true){
+						AnomalyElementObj = x
 						anomaly = true;
 						anomaly_SpanID = x.span_id;
 						expected = x.ExpectedAnomalySpanName;

@@ -5,7 +5,13 @@ import os
 
 
 hostName = os.getenv("API_HOSTNAME")
-serverPort = int(os.getenv("API_PORT"))
+if hostName is None:
+    hostName = "localhost"
+api_port = os.getenv("API_PORT")
+if api_port is None:
+    serverPort = 9181
+else:
+    serverPort = int(api_port)
 
 
 class MainServer(BaseHTTPRequestHandler):
@@ -26,7 +32,7 @@ class MainServer(BaseHTTPRequestHandler):
             modelNameParam = queryParams["modelName"]
 
         # Route
-        # Sample: localhost.9181/START_TRAIN?modelName=MyName
+        # Sample: localhost:9181/START_TRAIN?modelName=MyName
         if path == '/START_TRAIN':
             self.process_queue.put(("START_TRAIN", modelNameParam))
 
