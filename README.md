@@ -23,20 +23,9 @@ The system consists of microservice modules:
 ![Img2](./images/img2.png)
 
 ## Setup
-To get started download source code and dev tools such: Python, Go, Docker, Node.js,
-For database it is recommended that Clickhouse will be used using [docker image](https://hub.docker.com/r/clickhouse/clickhouse-server/)
-and [RabbitMQ](https://hub.docker.com/_/rabbitmq)
-Next all necessery tables for DB are written in ops/*.sql files 
+To get started with source code download repository and necessary tools : Python, Go, Docker, Node.js.
 
-Next complie & run Go backend and Collector. Run main.py ML service. And run Svlete frontend using command:
-`npm run dev -- --open`
-
-Pip packages necessery for MLService:
-- tensorflow
-- numpy
-- pickle
-- pika
-- clickhouse_connect
+But the best way to start is to download docker and run `docker-compose.yml`, because it will handle everything automaticly.
 
 ## Acknowledgements
 This project is under heavy development, and some parts may not work currently properly or may change.
