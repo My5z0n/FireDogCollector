@@ -2,7 +2,7 @@
   import SpanTable from "./SpanTable.svelte";
   import Graph from "./Graph.svelte";
   import { page } from "$app/stores";
-  import { anomalyElementObjStore } from "../../../store";
+  import { anomalyElementObjStore } from "../../../store.js";
 
   let name = $page.params.id;
   let DetectedAnomalyInTrace = false;
@@ -39,7 +39,7 @@
 
   function exploreOutliners() {
     console.log("AnomalyElementObj", AnomalyElementObj);
-    anomalyElementObjStore.set(anomalyElementObj);
+    anomalyElementObjStore.set(AnomalyElementObj);
   }
 </script>
 
