@@ -31,7 +31,8 @@ CREATE TABLE  IF NOT EXISTS FireDogTraces.predictions
     anomaly_detected Nullable(Bool),
     span_name String,
     span_id String,
-    expected_span_name String
+    expected_span_name String,
+    span_position INT,
 )
 ENGINE = MergeTree()
 PRIMARY KEY (trace_id);

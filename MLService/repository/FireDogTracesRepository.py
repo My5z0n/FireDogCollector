@@ -29,10 +29,10 @@ class Repository:
             raise Exception("No DB connected")
 
     def set_prediction(self, trace_id: str, anomaly_detected: bool,
-                      span_name: str = "", span_id: str = "", expected_span_name: str = "") -> None:
+                      span_name: str = "", span_id: str = "", expected_span_name: str = "", position: int = 0) -> None:
         try:
             self.client.insert(table="predictions",
-                               data=[[trace_id, anomaly_detected, span_name, span_id, expected_span_name]])
+                               data=[[trace_id, anomaly_detected, span_name, span_id, expected_span_name,position]])
         except Exception as e:
             print(e)
 

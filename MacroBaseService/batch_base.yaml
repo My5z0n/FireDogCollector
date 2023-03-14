@@ -1,0 +1,25 @@
+macrobase.query.name: batchQuery
+macrobase.pipeline.class: macrobase.analysis.pipeline.BasicBatchedPipeline
+
+logging:
+  level: INFO
+
+  loggers:
+    "macrobase": TRACE
+
+macrobase.analysis.minSupport: 0.001
+macrobase.analysis.minOIRatio: 2
+
+macrobase.loader.loaderType: macrobase.ingest.CustomJDBCIngester
+macrobase.loader.jdbc.driver: com.clickhouse.jdbc.ClickHouseDriver
+macrobase.loader.jdbc.urlprefix: "jdbc:clickhouse:"
+
+macrobase.loader.db.database: FireDogTraces
+macrobase.loader.db.url: localhost:8123
+
+macrobase.loader.db.user: jeff
+macrobase.loader.db.password: password
+
+macrobase.loader.attributes: [Test,AWS.region, http.status_code]
+macrobase.loader.metrics: [Test]
+macrobase.loader.db.baseQuery: "SELECT startsWith(t.paths, '!START#/api/user/:user#!END') AS Test, s.* FROM spans s, traces t WHERE s.trace_id = t.trace_id AND startsWith(t.paths, '!START#/api/user/:user') AND s.span_name IN ('!START', '/api/user/:user');"
