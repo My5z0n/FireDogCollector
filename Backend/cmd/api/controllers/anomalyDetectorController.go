@@ -36,10 +36,11 @@ func (c AnomalyDetectorController) StartRestartModelLearning(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, "OK")
 }
 func (c AnomalyDetectorController) HuntOutlines(ctx *gin.Context) {
-
+	//TODO Change input biding to require only TraceID
 	binding := dto.SpanListElementDTO{}
 
 	err := ctx.BindJSON(&binding)
+
 	if err != nil {
 		//TODO: PROPERLY HANDLE ERRORS
 		log.Error().Msg("BAD INPUT")

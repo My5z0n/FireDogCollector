@@ -113,7 +113,7 @@ class MLModel:
                         out_word = word
                         break
                 print("Out Word: " + out_word)
-                return True, paths_array[no_path]["span_name"], paths_array[no_path]["span_id"], out_word
+                return True, paths_array[no_path]["span_name"], paths_array[no_path]["span_id"], out_word, no_path
 
         return False, "", "", ""
 
