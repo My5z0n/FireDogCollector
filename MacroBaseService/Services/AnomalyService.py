@@ -16,7 +16,7 @@ class AnomalyService():
         l1 = goodPart.split("#")  # ['!START', '/api/user/:user']
         l1 = ["'"+l+"'" for l in l1]
         l3 = ",".join(l1)
-        baseSQLStatement = f"SELECT startsWith(t.paths, '{x1}') AS Test, s.* FROM spans s, traces t WHERE s.trace_id = t.trace_id AND startsWith(t.paths, '{x2}') AND s.span_name IN ({l3});"
+        baseSQLStatement = f"SELECT startsWith(t.paths, '{x1}') AS Test, s.* FROM spans s JOIN traces t ON s.trace_id = t.trace_id WHERE startsWith(t.paths, '{x2}') AND s.span_name IN ({l3}) AND s.trace_id IN ( SELECT trace_id FROM predictions);"
         colNames = self.db.getColumnNames("spans")
         self.macro_base.prepareBatch(baseSQLStatement, colNames)
         result = self.macro_base.makeCall()

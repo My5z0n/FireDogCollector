@@ -8,7 +8,7 @@ logging:
     "macrobase": TRACE
 
 macrobase.analysis.minSupport: 0.001
-macrobase.analysis.minOIRatio: 2
+macrobase.analysis.minOIRatio: 1
 
 macrobase.loader.loaderType: macrobase.ingest.CustomJDBCIngester
 macrobase.loader.jdbc.driver: com.clickhouse.jdbc.ClickHouseDriver
