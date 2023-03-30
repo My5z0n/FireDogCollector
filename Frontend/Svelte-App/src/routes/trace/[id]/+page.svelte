@@ -38,7 +38,6 @@
   }
 
   function exploreOutliners() {
-    console.log("AnomalyElementObj", AnomalyElementObj);
     anomalyElementObjStore.set(AnomalyElementObj);
   }
 </script>
