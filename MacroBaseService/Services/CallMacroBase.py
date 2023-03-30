@@ -37,6 +37,8 @@ class CallMacroBase():
                 job = json_object
                 result = json.dumps(json_object)
                 print(json.dumps(json_object, indent=1))
+                with open('formated_result.json', "w") as f:
+                    json.dump(json_object, f, indent=1)
 
         else:
             print("No result file")

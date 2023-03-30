@@ -53,6 +53,14 @@ func (s *Span) SetAttribute(name string, value any) {
 			if *v != nil {
 				s.Attributes[name] = *v
 			}
+		case **int64:
+			if *v != nil {
+				s.Attributes[name] = *v
+			}
+		case **bool:
+			if *v != nil {
+				s.Attributes[name] = *v
+			}
 		case **float64:
 			if *v != nil {
 				s.Attributes[name] = *v

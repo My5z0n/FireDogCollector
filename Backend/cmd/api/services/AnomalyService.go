@@ -23,7 +23,7 @@ type Item struct {
 type ItemSet struct {
 	Support        float64 `json:"support"`
 	NumRecords     float64 `json:"numRecords"`
-	RatioToInliers string  `json:"ratioToInliers"`
+	RatioToInliers float64 `json:"ratioToInliers"`
 	Items          []Item  `json:"items"`
 }
 
@@ -59,9 +59,9 @@ func (s AnomalyService) MakeOutlinesRequest(binding dto.SpanListElementDTO) ([]J
 
 	newData, err := json.Marshal(msg)
 
-	xD := bytes.NewBuffer(newData)
+	dat := bytes.NewBuffer(newData)
 	fmt.Print(string(newData))
-	resp, err := http.Post("http://localhost:9182/find-outlines", "application/json", xD)
+	resp, err := http.Post("http://localhost:9182/find-outlines", "application/json", dat)
 	response, err := io.ReadAll(resp.Body)
 	var jsonData []JSONData
 	err = json.Unmarshal(response, &jsonData)
